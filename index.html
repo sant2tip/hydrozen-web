@@ -9,6 +9,8 @@
   <style>
     .no-scrollbar::-webkit-scrollbar{ display:none; }
     .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+    .modal-enter { opacity: 0; transform: translateY(8px); }
+    .modal-enter-active { opacity: 1; transform: translateY(0); transition: all .18s ease-out; }
   </style>
 </head>
 <body class="bg-gradient-to-b from-sky-50 to-white text-slate-800">
@@ -22,6 +24,34 @@
   <script type="text/babel">
     const { useState, useMemo, useRef, useEffect } = React;
 
+    // ===== Utilidades =====
+    const money = (n)=> n.toLocaleString(undefined,{style:'currency', currency:'EUR'});
+    function useLocalStorage(key, initial){
+      const [value,setValue] = useState(()=>{
+        try{ const v = localStorage.getItem(key); return v? JSON.parse(v): initial; }catch{ return initial; }
+      });
+      useEffect(()=>{ localStorage.setItem(key, JSON.stringify(value)); },[key,value]);
+      return [value,setValue];
+    }
+    function cls(...xs){return xs.filter(Boolean).join(' ')}
+
+    // Imagen con fallbacks para evitar roturas en GH Pages
+    function SmartImg({ srcList = [], alt = '', className = '' }) {
+      const [idx, setIdx] = useState(0);
+      const [failed, setFailed] = useState(false);
+      useEffect(() => { setIdx(0); setFailed(false); }, [JSON.stringify(srcList)]);
+      if (failed || !srcList || srcList.length === 0) {
+        return (
+          <div className={cls('grid place-items-center bg-slate-100 text-slate-400', className)}>
+            <span className="text-xs">Imagen no disponible</span>
+          </div>
+        );
+      }
+      const src = srcList[idx];
+      const onError = () => { if (idx + 1 < srcList.length) setIdx(idx + 1); else setFailed(true); };
+      return <img src={src} alt={alt} className={className} onError={onError} />;
+    }
+
     // ===== Datos =====
     const COLORS = [
       { id: "graphite", name: "Graphite", hex: "#4b5563" },
@@ -33,9 +63,9 @@
       id: "hydrozen-bottle",
       title: "Hydrozen Bottle – Filtro Activo",
       subtitle: "Hidratación limpia, diseño minimalista",
-      price: 24.9,
-      compareAt: 34.9,
       capacities: ["450 ml","600 ml","750 ml"],
+      priceByCapacity: { "450 ml": 19.9, "600 ml": 24.9, "750 ml": 29.9 },
+      compareByCapacity: { "450 ml": 24.9, "600 ml": 34.9, "750 ml": 39.9 },
       bullets: [
         "Filtrado de una sola pasada para agua más limpia",
         "A prueba de fugas con apertura rápida",
@@ -53,37 +83,32 @@
       }
     };
 
-    // Catálogo general (incluye NOVEDAD: filtros reemplazables)
+    // Packs de filtros (OFERTA)
+    const FILTER_PACKS = [
+      { id:'pack1', label:'Pack 1', qty:1, price:7.9, compareAt:9.9 },
+      { id:'pack5', label:'Pack 5', qty:5, price:34.9, compareAt:39.5 },
+      { id:'pack10', label:'Pack 10', qty:10, price:64.9, compareAt:79.0 },
+    ];
+
+    // Catálogo (sólo dos cartas; los packs se eligen en modal)
     const CATALOG = [
       {
         id: "hydrozen-bottle",
+        kind: 'bottle',
         title: "Hydrozen Bottle",
         subtitle: "Botella con filtro activo",
-        price: 24.9,
-        compareAt: 34.9,
-        image: "product.jpg",
+        imageList: ["product.jpg","product.png","product.jpeg","imagen botella.png","botella.jpg","botella.png"],
         badge: "Top ventas"
       },
       {
         id: "filter-refill",
-        title: "Filtro activo · Repuesto",
-        subtitle: "Cartucho de recambio (hasta 3 meses)",
-        price: 7.9,
-        compareAt: 9.9,
-        image: "filtros.jpg",
-        badge: "Novedad"
+        kind: 'filter',
+        title: "Filtros reemplazables",
+        subtitle: "OFERTA por lanzamiento",
+        imageList: ["filtros.jpg","filtros.png","filtros.jpeg"],
+        badge: "Oferta"
       }
     ];
-
-    const money = (n)=> n.toLocaleString(undefined,{style:'currency', currency:'EUR'});
-
-    function useLocalStorage(key, initial){
-      const [value,setValue] = useState(()=>{
-        try{ const v = localStorage.getItem(key); return v? JSON.parse(v): initial; }catch{ return initial; }
-      });
-      useEffect(()=>{ localStorage.setItem(key, JSON.stringify(value)); },[key,value]);
-      return [value,setValue];
-    }
 
     // ===== App =====
     function App(){
@@ -98,7 +123,7 @@
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
             {route==='home' && <>
               <HeroBanner onNavigate={setRoute} />
-              <ProductShowcase cart={cart} setCart={setCart} />
+              <HomeProductIntro cart={cart} setCart={setCart} />
               <Features />
               <CTA onNavigate={setRoute} />
             </>}
@@ -115,7 +140,7 @@
       );
     }
 
-    // ===== UI =====
+    // ===== TopBar =====
     function TopBar({ onNavigate, cartCount }){
       return (
         <header className="fixed top-0 left-0 right-0 z-40 backdrop-blur bg-white/80 border-b border-slate-100 shadow-sm">
@@ -143,6 +168,7 @@
       );
     }
 
+    // ===== Hero =====
     function HeroBanner({ onNavigate }){
       const videoRef = useRef(null);
       const [playing,setPlaying] = useState(true);
@@ -174,16 +200,16 @@
       );
     }
 
-    function ProductShowcase({ cart, setCart }){
+    // ===== Intro rápido de producto en Home =====
+    function HomeProductIntro({ cart, setCart }){
       const [color,setColor] = useState(COLORS[0]);
       const [capacity,setCapacity] = useState(PRODUCT.capacities[1]);
       const [qty,setQty] = useState(1);
       function addToCart(){
-        const line = { id: `${PRODUCT.id}-${color.id}-${capacity}`, title: PRODUCT.title, color: color.name, capacity, price: PRODUCT.price, qty, image: PRODUCT.images.byColor[color.id] || PRODUCT.images.main };
-        setCart(prev=>{
-          const i = prev.findIndex(p=>p.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + qty }; return cp; }
-          return [...prev,line];
-        });
+        const srcList = [ PRODUCT.images.byColor[color.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ].filter(Boolean);
+        const price = PRODUCT.priceByCapacity[capacity];
+        const line = { id: `${PRODUCT.id}-${color.id}-${capacity}`, title: PRODUCT.title, color: color.name, capacity, price, qty, srcList };
+        setCart(prev=>{ const i = prev.findIndex(p=>p.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + qty }; return cp; } return [...prev,line]; });
       }
       return (
         <section id="producto" className="py-12 grid lg:grid-cols-2 gap-10 items-center">
@@ -197,7 +223,7 @@
               <div className="text-sm font-medium">🎨 Color</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {COLORS.map(c=> (
-                  <button key={c.id} onClick={()=>setColor(c)} className={`px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm ${color.id===c.id? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200'}`}>
+                  <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm', color.id===c.id? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200')}>
                     <span className="w-4 h-4 rounded-full" style={{background:c.hex}}></span> {c.name}
                   </button>
                 ))}
@@ -207,7 +233,7 @@
               <div className="text-sm font-medium">📦 Capacidad</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {PRODUCT.capacities.map(cap=> (
-                  <button key={cap} onClick={()=>setCapacity(cap)} className={`px-3 py-2 rounded-xl border shadow-sm ${capacity===cap? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200'}`}>{cap}</button>
+                  <button key={cap} onClick={()=>setCapacity(cap)} className={cls('px-3 py-2 rounded-xl border shadow-sm', capacity===cap? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200')}>{cap}</button>
                 ))}
               </div>
             </div>
@@ -220,14 +246,12 @@
               <button onClick={addToCart} className="px-5 py-3 rounded-2xl bg-sky-600 text-white font-semibold shadow hover:shadow-md">Añadir al carrito</button>
             </div>
             <div className="mt-4 flex items-end gap-3">
-              <div className="text-2xl font-semibold">{money(PRODUCT.price)}</div>
-              <div className="text-slate-400 line-through">{money(PRODUCT.compareAt)}</div>
-              <span className="text-xs bg-emerald-100 text-emerald-700 rounded-full px-2 py-1">Ahorra {money(PRODUCT.compareAt-PRODUCT.price)}</span>
+              <div className="text-2xl font-semibold">{money(PRODUCT.priceByCapacity[capacity])}</div>
+              <div className="text-slate-400 line-through">{money(PRODUCT.compareByCapacity[capacity])}</div>
+              <span className="text-xs bg-emerald-100 text-emerald-700 rounded-full px-2 py-1">Ahorra {money(PRODUCT.compareByCapacity[capacity]-PRODUCT.priceByCapacity[capacity])}</span>
             </div>
             <div className="mt-6 grid sm:grid-cols-2 gap-3">
-              {PRODUCT.bullets.map(b=> (
-                <div key={b} className="flex items-start gap-2">✅<p className="text-sm text-slate-700">{b}</p></div>
-              ))}
+              {PRODUCT.bullets.map(b=> (<div key={b} className="flex items-start gap-2">✅<p className="text-sm text-slate-700">{b}</p></div>))}
             </div>
           </div>
         </section>
@@ -244,8 +268,8 @@
             <div ref={scrollerRef} className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
               {COLORS.map((c,i)=> (
                 <div key={c.id} className="shrink-0 w-[85%] sm:w-[70%] md:w-[60%] lg:w-[480px] snap-center">
-                  <div className={`relative rounded-2xl overflow-hidden border ${color.id===c.id? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200'}`}>
-                    <img src={(PRODUCT.images.byColor[c.id]||PRODUCT.images.main)} alt={`Hydrozen ${c.name}`} className="w-full h-[360px] object-cover" />
+                  <div className={cls('relative rounded-2xl overflow-hidden border', color.id===c.id? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200')}>
+                    <SmartImg srcList={[PRODUCT.images.byColor[c.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png'].filter(Boolean)} alt={`Hydrozen ${c.name}`} className="w-full h-[360px] object-cover" />
                     <div className="absolute left-3 top-3 bg-white/85 rounded-xl px-3 py-1 text-xs flex items-center gap-2 shadow">
                       <span className="w-3 h-3 rounded-full" style={{background:c.hex}}></span> {c.name}
                     </div>
@@ -255,26 +279,22 @@
             </div>
           </div>
           <div className="mt-3 flex items-center justify-center gap-2">
-            {COLORS.map((c,i)=> (
-              <button key={c.id} onClick={()=>snapTo(i)} className={`h-2.5 rounded-full transition-all ${c.id===color.id? 'w-6 bg-sky-600':'w-2.5 bg-slate-300'}`}></button>
-            ))}
+            {COLORS.map((c,i)=> (<button key={c.id} onClick={()=>snapTo(i)} className={cls('h-2.5 rounded-full transition-all', c.id===color.id? 'w-6 bg-sky-600':'w-2.5 bg-slate-300')}></button>))}
           </div>
         </div>
       );
     }
 
-    // ===== NUEVA SUBPÁGINA: Catálogo =====
+    // ===== Catálogo con modales =====
     function Catalog({ onNavigate, cart, setCart }){
-      function addProduct(p){
-        const line = { id: `${p.id}`, title: p.title, color: p.title.includes('Filtro')? '—' : 'Graphite', capacity: p.title.includes('Filtro')? 'Repuesto' : '600 ml', price: p.price, qty: 1, image: p.image };
-        setCart(prev=>{ const i = prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + 1 }; return cp;} return [...prev, line]; });
-      }
+      const [modal, setModal] = useState(null); // {type:'filter'|'bottle', product:CATALOG[i]}
+
       return (
         <section className="py-6">
           <div className="flex items-end justify-between gap-4 mb-6">
             <div>
               <h2 className="text-2xl font-bold">Nuestros productos</h2>
-              <p className="text-slate-600">Descubre la botella Hydrozen y los <span className="font-medium text-emerald-700">nuevos filtros reemplazables</span>.</p>
+              <p className="text-slate-600">Descubre la botella Hydrozen y los <span className="font-medium text-emerald-700">filtros reemplazables en oferta</span>.</p>
             </div>
             <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-2xl bg-slate-900 text-white">Ver carrito</button>
           </div>
@@ -283,30 +303,167 @@
             {CATALOG.map(p=> (
               <article key={p.id} className="group rounded-2xl border bg-white shadow-sm overflow-hidden flex flex-col">
                 <div className="relative">
-                  <img src={p.image} alt={p.title} className="w-full h-56 object-cover group-hover:scale-[1.02] transition" />
+                  <button className="absolute inset-0 z-10" onClick={()=>setModal({type:p.kind, product:p})} aria-label="Abrir detalles" />
+                  <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-56 object-cover group-hover:scale-[1.02] transition" />
                   {p.badge && (
-                    <span className={`absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full ${p.badge==='Novedad'? 'bg-emerald-100 text-emerald-700':'bg-sky-100 text-sky-700'}`}>{p.badge}</span>
+                    <span className={cls('absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full', p.badge==='Oferta'? 'bg-rose-100 text-rose-700':'bg-sky-100 text-sky-700')}>{p.badge}</span>
                   )}
                 </div>
                 <div className="p-4 flex-1 flex flex-col">
                   <h3 className="font-semibold leading-tight">{p.title}</h3>
                   <p className="text-sm text-slate-600 mt-1 flex-1">{p.subtitle}</p>
-                  <div className="mt-3 flex items-baseline gap-2">
-                    <div className="text-lg font-semibold">{money(p.price)}</div>
-                    {p.compareAt && <div className="text-slate-400 line-through text-sm">{money(p.compareAt)}</div>}
-                  </div>
+                  {p.kind==='filter' && (
+                    <div className="mt-2 text-sm">
+                      <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 px-2 py-1 rounded-full">🔥 En oferta</span>
+                      <span className="ml-2 text-slate-500">elige pack al abrir</span>
+                    </div>
+                  )}
                   <div className="mt-4 flex gap-2">
-                    <button onClick={()=>addProduct(p)} className="flex-1 px-4 py-2 rounded-xl bg-sky-600 text-white">Añadir</button>
+                    <button onClick={()=>setModal({type:p.kind, product:p})} className="flex-1 px-4 py-2 rounded-xl bg-slate-900 text-white">Ver opciones</button>
                     <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl border">Carrito</button>
                   </div>
                 </div>
               </article>
             ))}
           </div>
+
+          {modal?.type==='filter' && (
+            <FilterModal product={modal.product} onClose={()=>setModal(null)} onAdd={(pack)=>{
+              const line = { id: `filter-${pack.id}`, title: `Filtro activo · ${pack.label}`, color:'—', capacity: pack.label, price: pack.price, qty: 1, srcList: modal.product.imageList };
+              setCart(prev=>{ const i = prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + 1 }; return cp;} return [...prev, line]; });
+              setModal(null);
+            }} />
+          )}
+
+          {modal?.type==='bottle' && (
+            <BottleModal onClose={()=>setModal(null)} onAdd={({color,capacity,qty,price,srcList})=>{
+              const line = { id: `${PRODUCT.id}-${color.id}-${capacity}`, title: PRODUCT.title, color: color.name, capacity, price, qty, srcList };
+              setCart(prev=>{ const i = prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + qty }; return cp;} return [...prev, line]; });
+              setModal(null);
+            }} />
+          )}
         </section>
       );
     }
 
+    // ===== Modales =====
+    function ModalShell({ children, onClose }){
+      useEffect(()=>{
+        const handler = (e)=>{ if(e.key==='Escape') onClose(); };
+        document.addEventListener('keydown', handler); return ()=>document.removeEventListener('keydown', handler);
+      },[onClose]);
+      return (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40" onClick={onClose}></div>
+          <div className="modal-enter-active absolute left-1/2 top-14 -translate-x-1/2 w-[min(96vw,900px)]">
+            {children}
+          </div>
+        </div>
+      );
+    }
+
+    function FilterModal({ product, onClose, onAdd }){
+      const [sel, setSel] = useState(FILTER_PACKS[0]);
+      return (
+        <ModalShell onClose={onClose}>
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border">
+            <div className="grid md:grid-cols-2">
+              <SmartImg srcList={product.imageList} alt="Filtros" className="w-full h-72 md:h-full object-cover" />
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">Filtros reemplazables</h3>
+                  <button onClick={onClose} className="text-slate-500 hover:text-slate-900">✕</button>
+                </div>
+                <p className="text-slate-600 mt-1">Elige tu pack en <span className="font-medium text-rose-600">oferta</span>.</p>
+
+                <div className="mt-4 grid sm:grid-cols-3 gap-3">
+                  {FILTER_PACKS.map(p=> (
+                    <button key={p.id} onClick={()=>setSel(p)} className={cls('text-left border rounded-xl p-3', sel.id===p.id? 'ring-2 ring-rose-400 border-rose-300':'border-slate-200')}>
+                      <div className="text-sm font-semibold">{p.label}</div>
+                      <div className="text-xs text-slate-500">{p.qty} cartucho{p.qty>1?'s':''}</div>
+                      <div className="mt-1 flex items-baseline gap-2">
+                        <span className="font-semibold">{money(p.price)}</span>
+                        <span className="text-[12px] text-slate-400 line-through">{money(p.compareAt)}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-5 flex gap-3">
+                  <button onClick={()=>onAdd(sel)} className="px-5 py-3 rounded-2xl bg-rose-600 text-white font-semibold shadow hover:shadow-md">Añadir {sel.label}</button>
+                  <button onClick={onClose} className="px-5 py-3 rounded-2xl border">Cancelar</button>
+                </div>
+                <p className="text-xs text-slate-500 mt-3">Ahorra hasta {money(Math.max(...FILTER_PACKS.map(p=>p.compareAt-p.price)))} con los packs.</p>
+              </div>
+            </div>
+          </div>
+        </ModalShell>
+      );
+    }
+
+    function BottleModal({ onClose, onAdd }){
+      const [color,setColor] = useState(COLORS[0]);
+      const [capacity,setCapacity] = useState(PRODUCT.capacities[1]);
+      const [qty,setQty] = useState(1);
+      const price = PRODUCT.priceByCapacity[capacity];
+      const compare = PRODUCT.compareByCapacity[capacity];
+      const srcList = [ PRODUCT.images.byColor[color.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ].filter(Boolean);
+      return (
+        <ModalShell onClose={onClose}>
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border">
+            <div className="grid md:grid-cols-2 gap-0">
+              <div className="p-4 md:p-6">
+                <VariantCarousel color={color} setColor={setColor} />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">Hydrozen Bottle</h3>
+                  <button onClick={onClose} className="text-slate-500 hover:text-slate-900">✕</button>
+                </div>
+                <p className="text-slate-600 mt-1">Elige <b>color</b> y <b>capacidad</b>.</p>
+
+                <div className="mt-4">
+                  <div className="text-sm font-medium">🎨 Color</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {COLORS.map(c=> (
+                      <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm', color.id===c.id? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200')}>
+                        <span className="w-4 h-4 rounded-full" style={{background:c.hex}}></span> {c.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <div className="text-sm font-medium">📦 Capacidad</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {PRODUCT.capacities.map(cap=> (
+                      <button key={cap} onClick={()=>setCapacity(cap)} className={cls('px-3 py-2 rounded-xl border shadow-sm', capacity===cap? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200')}>{cap}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-end gap-3">
+                  <div className="text-2xl font-semibold">{money(price)}</div>
+                  <div className="text-slate-400 line-through">{money(compare)}</div>
+                  <span className="text-xs bg-emerald-100 text-emerald-700 rounded-full px-2 py-1">Ahorra {money(compare-price)}</span>
+                </div>
+
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex items-center border rounded-xl shadow-sm">
+                    <button className="px-3 py-2" onClick={()=>setQty(q=>Math.max(1,q-1))}>−</button>
+                    <div className="px-4 py-2 min-w-10 text-center font-medium">{qty}</div>
+                    <button className="px-3 py-2" onClick={()=>setQty(q=>q+1)}>＋</button>
+                  </div>
+                  <button onClick={()=>onAdd({color,capacity,qty,price,srcList})} className="px-5 py-3 rounded-2xl bg-sky-600 text-white font-semibold shadow hover:shadow-md">Añadir al carrito</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ModalShell>
+      );
+    }
+
+    // ===== Resto de secciones =====
     function Features(){
       const items = [
         { t: "Filtrado de una pasada", d: "Agua más limpia sin esfuerzo, con repuestos asequibles." },
@@ -357,7 +514,7 @@
               <div className="lg:col-span-2 space-y-4">
                 {cart.map(line=> (
                   <div key={line.id} className="flex gap-4 items-center p-4 rounded-2xl border bg-white shadow-sm">
-                    <img src={line.image} className="w-24 h-24 object-cover rounded-xl"/>
+                    <SmartImg srcList={line.srcList} alt={line.title} className="w-24 h-24 object-cover rounded-xl"/>
                     <div className="flex-1">
                       <div className="font-medium">{line.title}</div>
                       <div className="text-sm text-slate-600">{line.capacity} · {line.color}</div>
@@ -386,20 +543,13 @@
     }
 
     function Checkout({ cart, total, onNavigate, setCart }){
-      const [form, setForm] = useState({
-        name: "", email: "", phone: "",
-        address: "", city: "", province: "", postal: "", country: "",
-        cardNumber: "", cardName: "", exp: "", cvc: "",
-      });
+      const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", province: "", postal: "", country: "", cardNumber: "", cardName: "", exp: "", cvc: "" });
       const [shipping, setShipping] = useState("standard");
       const [placed, setPlaced] = useState(false);
       const [errors, setErrors] = useState({});
-
       const shippingCost = shipping === "express" ? 4.9 : 0;
       const orderTotal = (total || 0) + shippingCost;
-
       const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-
       function validate(){
         const errs={};
         if(!form.name.trim()) errs.name="Requerido";
@@ -414,14 +564,7 @@
         if(!form.cvc || form.cvc.length<3) errs.cvc="CVC inválido";
         setErrors(errs); return Object.keys(errs).length===0;
       }
-
-      function placeOrder(e){
-        e.preventDefault();
-        if(!validate()) return;
-        setPlaced(true);
-        setCart([]);
-      }
-
+      function placeOrder(e){ e.preventDefault(); if(!validate()) return; setPlaced(true); setCart([]); }
       if(placed){
         return (
           <section className="p-6 rounded-2xl bg-white border shadow-sm text-center">
@@ -435,14 +578,12 @@
           </section>
         );
       }
-
       return (
         <section className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 p-6 rounded-2xl border bg-white shadow-sm">
             <div className="flex items-center gap-2 mb-4">💳 <h2 className="text-xl font-semibold">Datos para finalizar compra</h2></div>
             <form onSubmit={placeOrder} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2 text-sm text-slate-600">Tus datos están protegidos. Este es un ejemplo sin procesamiento real de pagos.</div>
-
               <label className="text-sm">Nombre completo<input name="name" value={form.name} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.name && <div className="text-xs text-red-600 mt-1">{errors.name}</div>}</label>
               <label className="text-sm">Email<input name="email" value={form.email} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.email && <div className="text-xs text-red-600 mt-1">{errors.email}</div>}</label>
               <label className="text-sm">Teléfono<input name="phone" value={form.phone} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" /></label>
@@ -451,21 +592,13 @@
               <label className="text-sm">Provincia<input name="province" value={form.province} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" /></label>
               <label className="text-sm">Código postal<input name="postal" value={form.postal} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.postal && <div className="text-xs text-red-600 mt-1">{errors.postal}</div>}</label>
               <label className="text-sm">País<input name="country" value={form.country} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.country && <div className="text-xs text-red-600 mt-1">{errors.country}</div>}</label>
-
               <div className="sm:col-span-2 mt-2">
                 <div className="text-sm font-medium mb-2">🚚 Envío</div>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <label className={`flex items-center gap-2 border rounded-xl p-3 cursor-pointer ${shipping === 'standard' ? 'ring-2 ring-sky-500 border-sky-300' : 'border-slate-200'}`}>
-                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping === 'standard'} onChange={()=>setShipping('standard')} />
-                    Estándar (3-5 días) — Gratis
-                  </label>
-                  <label className={`flex items-center gap-2 border rounded-xl p-3 cursor-pointer ${shipping === 'express' ? 'ring-2 ring-sky-500 border-sky-300' : 'border-slate-200'}`}>
-                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping === 'express'} onChange={()=>setShipping('express')} />
-                    Express 24/48h — 4,90 €
-                  </label>
+                  <label className={cls('flex items-center gap-2 border rounded-xl p-3 cursor-pointer', shipping==='standard'? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200')}><input type="radio" name="ship" className="accent-sky-600" checked={shipping==='standard'} onChange={()=>setShipping('standard')} />Estándar (3-5 días) — Gratis</label>
+                  <label className={cls('flex items-center gap-2 border rounded-xl p-3 cursor-pointer', shipping==='express'? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200')}><input type="radio" name="ship" className="accent-sky-600" checked={shipping==='express'} onChange={()=>setShipping('express')} />Express 24/48h — 4,90 €</label>
                 </div>
               </div>
-
               <div className="sm:col-span-2 mt-2">
                 <div className="text-sm font-medium mb-2">💳 Pago con tarjeta (demo)</div>
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -475,23 +608,19 @@
                   <label className="text-sm">CVC<input name="cvc" value={form.cvc} onChange={handleChange} placeholder="123" className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.cvc && <div className="text-xs text-red-600 mt-1">{errors.cvc}</div>}</label>
                 </div>
               </div>
-
               <div className="sm:col-span-2 mt-4 flex gap-3">
                 <button type="button" onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl bg-slate-100">Volver al carrito</button>
                 <button type="submit" className="px-5 py-3 rounded-2xl bg-slate-900 text-white">Pagar y finalizar</button>
               </div>
             </form>
           </div>
-
           <aside className="p-6 rounded-2xl bg-slate-50 border h-fit">
             <h3 className="font-semibold mb-3 flex items-center gap-2">🛒 Resumen del pedido</h3>
             <div className="space-y-3">
-              {cart.length === 0 ? (
-                <div className="text-sm text-slate-600">Tu carrito está vacío.</div>
-              ) : (
+              {cart.length === 0 ? (<div className="text-sm text-slate-600">Tu carrito está vacío.</div>) : (
                 cart.map((line) => (
                   <div key={line.id} className="flex items-center gap-3">
-                    <img src={line.image} alt="item" className="w-12 h-12 rounded-lg object-cover" />
+                    <SmartImg srcList={line.srcList} alt={line.title} className="w-12 h-12 rounded-lg object-cover" />
                     <div className="flex-1 text-sm">
                       <div className="font-medium">{line.title}</div>
                       <div className="text-slate-600">{line.capacity} · {line.color}</div>
@@ -511,6 +640,7 @@
       );
     }
 
+    // Chat, proveedores, about, footer
     function Chatbot(){
       const [messages,setMessages] = useState([{role:'bot', text:'¡Hola! Soy el asistente Hydrozen. ¿En qué puedo ayudarte?'}]);
       const [draft,setDraft] = useState('');
@@ -521,7 +651,7 @@
             <div className="flex items-center gap-2 mb-3">💬 <h2 className="text-xl font-semibold">Chatbot de soporte</h2></div>
             <div className="flex-1 overflow-auto space-y-3">
               {messages.map((m,i)=> (
-                <div key={i} className={`max-w-[80%] p-3 rounded-2xl ${m.role==='bot'? 'bg-slate-100':'bg-sky-100 ml-auto'}`}>
+                <div key={i} className={cls('max-w-[80%] p-3 rounded-2xl', m.role==='bot'? 'bg-slate-100':'bg-sky-100 ml-auto')}>
                   <p className="text-sm">{m.text}</p>
                 </div>
               ))}
@@ -566,7 +696,6 @@
         </section>
       );
     }
-
     function FormSupplier(){
       return (
         <form className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -634,7 +763,3 @@
   </script>
 </body>
 </html>
-
-
-
-
