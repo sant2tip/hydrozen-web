@@ -81,6 +81,7 @@
               <CTA onNavigate={setRoute} />
             </>}
             {route==='cart' && <Cart cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
+            {route==='checkout' && <Checkout cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='chatbot' && <Chatbot />}
             {route==='suppliers' && <Suppliers />}
             {route==='about' && <About />}
@@ -304,11 +305,137 @@
                 <div className="flex justify-between text-sm mb-2 opacity-90"><span>Subtotal</span><span>{(total).toLocaleString(undefined,{style:'currency',currency:'EUR'})}</span></div>
                 <div className="flex justify-between text-sm mb-4 opacity-80"><span>Envío</span><span>Se calcula al finalizar</span></div>
                 <div className="flex justify-between text-lg font-semibold mb-5"><span>Total</span><span>{(total).toLocaleString(undefined,{style:'currency',currency:'EUR'})}</span></div>
-                <button className="w-full py-3 rounded-xl bg-sky-500 font-semibold shadow hover:shadow-md">Finalizar compra</button>
+                <button onClick={()=>onNavigate('checkout')} className="w-full py-3 rounded-xl bg-sky-500 font-semibold shadow hover:shadow-md">Continuar al pago</button>
                 <p className="text-xs mt-3 opacity-80">Pago seguro · Devoluciones 30 días</p>
               </aside>
             </div>
           )}
+        </section>
+      );
+    }
+
+    function Checkout({ cart, total, onNavigate, setCart }){
+      const [form, setForm] = useState({
+        name: "", email: "", phone: "",
+        address: "", city: "", province: "", postal: "", country: "",
+        cardNumber: "", cardName: "", exp: "", cvc: "",
+      });
+      const [shipping, setShipping] = useState("standard");
+      const [placed, setPlaced] = useState(false);
+      const [errors, setErrors] = useState({});
+
+      const shippingCost = shipping === "express" ? 4.9 : 0;
+      const orderTotal = (total || 0) + shippingCost;
+
+      const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+      function validate(){
+        const errs={};
+        if(!form.name.trim()) errs.name="Requerido";
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) errs.email="Email no válido";
+        if(!form.address.trim()) errs.address="Requerido";
+        if(!form.city.trim()) errs.city="Requerido";
+        if(!form.postal.trim()) errs.postal="Requerido";
+        if(!form.country.trim()) errs.country="Requerido";
+        if(!form.cardNumber || form.cardNumber.replace(/\s/g,"").length<12) errs.cardNumber="Número inválido";
+        if(!form.cardName.trim()) errs.cardName="Requerido";
+        if(!form.exp.trim()) errs.exp="MM/AA";
+        if(!form.cvc || form.cvc.length<3) errs.cvc="CVC inválido";
+        setErrors(errs); return Object.keys(errs).length===0;
+      }
+
+      function placeOrder(e){
+        e.preventDefault();
+        if(!validate()) return;
+        setPlaced(true);
+        setCart([]);
+      }
+
+      if(placed){
+        return (
+          <section className="p-6 rounded-2xl bg-white border shadow-sm text-center">
+            <div className="text-3xl mb-2">✅</div>
+            <h2 className="text-2xl font-bold">¡Pedido confirmado!</h2>
+            <p className="text-slate-700 mt-2">Te hemos enviado un email con los detalles del pedido.</p>
+            <div className="mt-6 flex gap-3 justify-center">
+              <button onClick={()=>onNavigate('home')} className="px-5 py-3 rounded-2xl bg-slate-900 text-white">Volver al inicio</button>
+              <button onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl bg-slate-100">Ver carrito</button>
+            </div>
+          </section>
+        );
+      }
+
+      return (
+        <section className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 p-6 rounded-2xl border bg-white shadow-sm">
+            <div className="flex items-center gap-2 mb-4">💳 <h2 className="text-xl font-semibold">Datos para finalizar compra</h2></div>
+            <form onSubmit={placeOrder} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2 text-sm text-slate-600">Tus datos están protegidos. Este es un ejemplo sin procesamiento real de pagos.</div>
+
+              <label className="text-sm">Nombre completo<input name="name" value={form.name} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.name && <div className="text-xs text-red-600 mt-1">{errors.name}</div>}</label>
+              <label className="text-sm">Email<input name="email" value={form.email} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.email && <div className="text-xs text-red-600 mt-1">{errors.email}</div>}</label>
+              <label className="text-sm">Teléfono<input name="phone" value={form.phone} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" /></label>
+              <label className="text-sm sm:col-span-2">Dirección<input name="address" value={form.address} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.address && <div className="text-xs text-red-600 mt-1">{errors.address}</div>}</label>
+              <label className="text-sm">Ciudad<input name="city" value={form.city} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.city && <div className="text-xs text-red-600 mt-1">{errors.city}</div>}</label>
+              <label className="text-sm">Provincia<input name="province" value={form.province} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" /></label>
+              <label className="text-sm">Código postal<input name="postal" value={form.postal} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.postal && <div className="text-xs text-red-600 mt-1">{errors.postal}</div>}</label>
+              <label className="text-sm">País<input name="country" value={form.country} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.country && <div className="text-xs text-red-600 mt-1">{errors.country}</div>}</label>
+
+              <div className="sm:col-span-2 mt-2">
+                <div className="text-sm font-medium mb-2">🚚 Envío</div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <label className={`flex items-center gap-2 border rounded-xl p-3 cursor-pointer ${shipping === 'standard' ? 'ring-2 ring-sky-500 border-sky-300' : 'border-slate-200'}`}>
+                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping === 'standard'} onChange={()=>setShipping('standard')} />
+                    Estándar (3-5 días) — Gratis
+                  </label>
+                  <label className={`flex items-center gap-2 border rounded-xl p-3 cursor-pointer ${shipping === 'express' ? 'ring-2 ring-sky-500 border-sky-300' : 'border-slate-200'}`}>
+                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping === 'express'} onChange={()=>setShipping('express')} />
+                    Express 24/48h — 4,90 €
+                  </label>
+                </div>
+              </div>
+
+              <div className="sm:col-span-2 mt-2">
+                <div className="text-sm font-medium mb-2">💳 Pago con tarjeta (demo)</div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <label className="text-sm">Número de tarjeta<input name="cardNumber" value={form.cardNumber} onChange={handleChange} placeholder="0000 0000 0000 0000" className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.cardNumber && <div className="text-xs text-red-600 mt-1">{errors.cardNumber}</div>}</label>
+                  <label className="text-sm">Nombre en la tarjeta<input name="cardName" value={form.cardName} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.cardName && <div className="text-xs text-red-600 mt-1">{errors.cardName}</div>}</label>
+                  <label className="text-sm">Expiración (MM/AA)<input name="exp" value={form.exp} onChange={handleChange} placeholder="12/28" className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.exp && <div className="text-xs text-red-600 mt-1">{errors.exp}</div>}</label>
+                  <label className="text-sm">CVC<input name="cvc" value={form.cvc} onChange={handleChange} placeholder="123" className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.cvc && <div className="text-xs text-red-600 mt-1">{errors.cvc}</div>}</label>
+                </div>
+              </div>
+
+              <div className="sm:col-span-2 mt-4 flex gap-3">
+                <button type="button" onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl bg-slate-100">Volver al carrito</button>
+                <button type="submit" className="px-5 py-3 rounded-2xl bg-slate-900 text-white">Pagar y finalizar</button>
+              </div>
+            </form>
+          </div>
+
+          <aside className="p-6 rounded-2xl bg-slate-50 border h-fit">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">🛒 Resumen del pedido</h3>
+            <div className="space-y-3">
+              {cart.length === 0 ? (
+                <div className="text-sm text-slate-600">Tu carrito está vacío.</div>
+              ) : (
+                cart.map((line) => (
+                  <div key={line.id} className="flex items-center gap-3">
+                    <img src={line.image} alt="item" className="w-12 h-12 rounded-lg object-cover" />
+                    <div className="flex-1 text-sm">
+                      <div className="font-medium">{line.title}</div>
+                      <div className="text-slate-600">{line.capacity} · {line.color}</div>
+                    </div>
+                    <div className="text-sm">x{line.qty}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="mt-4 border-t pt-4 space-y-1 text-sm">
+              <div className="flex justify-between"><span>Subtotal</span><span>{(total || 0).toLocaleString(undefined, { style: 'currency', currency: 'EUR' })}</span></div>
+              <div className="flex justify-between"><span>Envío</span><span>{shippingCost === 0 ? 'Gratis' : shippingCost.toLocaleString(undefined, { style: 'currency', currency: 'EUR' })}</span></div>
+              <div className="flex justify-between font-semibold text-base mt-1"><span>Total</span><span>{((total || 0) + shippingCost).toLocaleString(undefined, { style: 'currency', currency: 'EUR' })}</span></div>
+            </div>
+          </aside>
         </section>
       );
     }
@@ -435,3 +562,5 @@
   </script>
 </body>
 </html>
+
+
