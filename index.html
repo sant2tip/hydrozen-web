@@ -12,9 +12,17 @@
     body{font-family:'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji','Segoe UI Emoji';}
     .no-scrollbar::-webkit-scrollbar{ display:none; }
     .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+    /* Fondo Aqua de respaldo por CSS (si Tailwind no compila la clase arbitraria) */
+    html, body, #root { min-height: 100%; }
+    body.hz-aqua-bg {
+      background:
+        radial-gradient(ellipse at top, rgba(56,189,248,0.12), transparent 40%),
+        radial-gradient(ellipse at top right, rgba(16,185,129,0.10), transparent 35%);
+      background-color:#f9fbff;
+    }
   </style>
 </head>
-<body class="relative text-slate-800 bg-[radial-gradient(ellipse_at_top,_rgba(56,189,248,0.12),_transparent_40%),radial-gradient(ellipse_at_top_right,_rgba(16,185,129,0.10),_transparent_35%)]">
+<body class="relative text-slate-800 hz-aqua-bg bg-[radial-gradient(ellipse_at_top,_rgba(56,189,248,0.12),_transparent_40%),radial-gradient(ellipse_at_top_right,_rgba(16,185,129,0.10),_transparent_35%)]">
   <!-- blobs decorativos -->
   <div aria-hidden class="pointer-events-none fixed inset-0 -z-10">
     <div class="absolute -top-32 -left-32 h-[22rem] w-[22rem] rounded-full bg-sky-200/50 blur-3xl"></div>
@@ -757,5 +765,7 @@
   </script>
 </body>
 </html>
+
+
 
 
