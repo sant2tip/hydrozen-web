@@ -204,11 +204,11 @@
 function PromoBanner({ onNavigate }) {
   // === CONFIG ===
   const slides = [
-    { src: "banner1.jpg", alt: "Pureza en cada sorbo" },
-    { src: "banner2.jpg", alt: "Filtro activo Hydrozen" },
-    { src: "banner3.jpg", alt: "Diseño minimalista" },
+    { type: "video", src: "hero2.mp4", poster: "banner1.jpg" }, 
+    { type: "image", src: "banner2.jpg", alt: "Filtro activo Hydrozen" },
+    { type: "image", src: "banner3.jpg", alt: "Diseño minimalista" },
   ];
-  const intervalMs = 4000; // Autoplay cada 4s
+  const intervalMs = 5000; // cambia el ritmo si quieres
 
   const [i, setI] = React.useState(0);
   const timerRef = React.useRef(null);
@@ -217,17 +217,21 @@ function PromoBanner({ onNavigate }) {
   const go = (next) => setI((prev) => (prev + next + slides.length) % slides.length);
   const goTo = (idx) => setI(((idx % slides.length) + slides.length) % slides.length);
 
-  // Autoplay con pausa al hacer hover
+  // Autoplay: avanza solo si no hay hover y si NO hay un video reproduciéndose activamente
   React.useEffect(() => {
     const start = () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
-        if (!isHoveringRef.current) go(1);
+        // si el slide actual es video y aún no acabó, no pasamos
+        const curr = slides[i];
+        const vid = curr?.type === "video" ? document.getElementById(`promo-video-${i}`) : null;
+        const videoBusy = vid && !vid.paused && !vid.ended;
+        if (!isHoveringRef.current && !videoBusy) go(1);
       }, intervalMs);
     };
     start();
-    return () => timerRef.current && clearInterval(timerRef.current);
-  }, [intervalMs]);
+    return () => clearInterval(timerRef.current);
+  }, [i, intervalMs, slides]);
 
   return (
     <section className="mb-6">
@@ -246,20 +250,12 @@ function PromoBanner({ onNavigate }) {
               🔥 Lanzamiento
             </div>
             <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
-            <p className="mt-2 ink-2">
-              Carrusel con autoplay, flechas y puntos. Ideal para destacar ofertas o novedades.
-            </p>
+            <p className="mt-2 ink-2">Carrusel mixto con imágenes y vídeo (autoplay, flechas y puntos).</p>
             <div className="mt-4 flex gap-3">
-              <button
-                onClick={() => onNavigate("products")}
-                className="px-5 py-3 rounded-2xl btn-primary font-semibold hover:shadow-xl active:scale-[.99]"
-              >
+              <button onClick={() => onNavigate("products")} className="px-5 py-3 rounded-2xl btn-primary font-semibold">
                 Ver ofertas
               </button>
-              <button
-                onClick={() => onNavigate("chatbot")}
-                className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10"
-              >
+              <button onClick={() => onNavigate("chatbot")} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">
                 Hablar con soporte
               </button>
             </div>
@@ -272,21 +268,39 @@ function PromoBanner({ onNavigate }) {
             onMouseLeave={() => (isHoveringRef.current = false)}
           >
             {/* Slides */}
-            <div
-              className="h-full w-full"
-              style={{ position: "relative" }}
-            >
-              {slides.map((s, idx) => (
-                <img
-                  key={idx}
-                  src={s.src}
-                  alt={s.alt || ""}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                    idx === i ? "opacity-100" : "opacity-0"
-                  }`}
-                  loading="lazy"
-                />
-              ))}
+            <div className="h-full w-full relative">
+              {slides.map((s, idx) => {
+                const visible = idx === i;
+                return (
+                  <div
+                    key={idx}
+                    className={`absolute inset-0 transition-opacity duration-500 ${
+                      visible ? "opacity-100" : "opacity-0 pointer-events-none"
+                    }`}
+                  >
+                    {s.type === "video" ? (
+                      <video
+                        id={`promo-video-${idx}`}
+                        src={s.src}
+                        poster={s.poster || undefined}
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <img
+                        src={s.src}
+                        alt={s.alt || ""}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Flechas */}
@@ -324,7 +338,6 @@ function PromoBanner({ onNavigate }) {
     </section>
   );
 }
-
     function TopBar({ onNavigate, cartCount, current }){
       return (
         <header className="fixed top-0 left-0 right-0 z-40 glass border-b border-white/10">
@@ -955,6 +968,7 @@ function PromoBanner({ onNavigate }) {
 
 
        
+
 
 
 
