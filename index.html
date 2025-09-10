@@ -201,40 +201,129 @@
     }
 
     // ===== UI =====
-    function PromoBanner({ onNavigate }) {
-      return (
-        <section className="mb-6">
-          <div className="relative overflow-hidden rounded-3xl glass shadow-lg p-6 sm:p-10">
-            <div className="absolute inset-0 pointer-events-none"
-                 style={{background:
-                   'radial-gradient(60% 60% at 10% 10%, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0) 60%), radial-gradient(50% 50% at 90% 20%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)'
-                 }} />
-            <div className="relative grid md:grid-cols-2 gap-6 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-sky-400/15 text-sky-200 border border-sky-300/20">🔥 Lanzamiento</div>
-                <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
-                <p className="mt-2 ink-2">
-                  Espacio para tu mensaje promocional, un micro-video o carrusel.
-                </p>
-                <div className="mt-4 flex gap-3">
-                  <button onClick={()=>onNavigate('products')}
-                    className="px-5 py-3 rounded-2xl btn-primary font-semibold hover:shadow-xl active:scale-[.99]">
-                    Ver ofertas
-                  </button>
-                  <button onClick={()=>onNavigate('chatbot')}
-                    className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">
-                    Hablar con soporte
-                  </button>
-                </div>
-              </div>
-              <div className="aspect-video rounded-2xl glass grid place-items-center ink-2">
-                <span className="text-sm">🔲 Área para tu banner/creativo</span>
-              </div>
+function PromoBanner({ onNavigate }) {
+  // === CONFIG ===
+  const slides = [
+    { src: "banner1.jpg", alt: "Pureza en cada sorbo" },
+    { src: "banner2.jpg", alt: "Filtro activo Hydrozen" },
+    { src: "banner3.jpg", alt: "Diseño minimalista" },
+  ];
+  const intervalMs = 4000; // Autoplay cada 4s
+
+  const [i, setI] = React.useState(0);
+  const timerRef = React.useRef(null);
+  const isHoveringRef = React.useRef(false);
+
+  const go = (next) => setI((prev) => (prev + next + slides.length) % slides.length);
+  const goTo = (idx) => setI(((idx % slides.length) + slides.length) % slides.length);
+
+  // Autoplay con pausa al hacer hover
+  React.useEffect(() => {
+    const start = () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        if (!isHoveringRef.current) go(1);
+      }, intervalMs);
+    };
+    start();
+    return () => timerRef.current && clearInterval(timerRef.current);
+  }, [intervalMs]);
+
+  return (
+    <section className="mb-6">
+      <div className="relative overflow-hidden rounded-3xl glass shadow-lg p-6 sm:p-10">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(60% 60% at 10% 10%, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0) 60%), radial-gradient(50% 50% at 90% 20%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)",
+          }}
+        />
+        <div className="relative grid md:grid-cols-2 gap-6 items-center">
+          {/* Texto */}
+          <div>
+            <div className="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-sky-400/15 text-sky-200 border border-sky-300/20">
+              🔥 Lanzamiento
+            </div>
+            <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
+            <p className="mt-2 ink-2">
+              Carrusel con autoplay, flechas y puntos. Ideal para destacar ofertas o novedades.
+            </p>
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => onNavigate("products")}
+                className="px-5 py-3 rounded-2xl btn-primary font-semibold hover:shadow-xl active:scale-[.99]"
+              >
+                Ver ofertas
+              </button>
+              <button
+                onClick={() => onNavigate("chatbot")}
+                className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10"
+              >
+                Hablar con soporte
+              </button>
             </div>
           </div>
-        </section>
-      );
-    }
+
+          {/* Carrusel */}
+          <div
+            className="relative aspect-video rounded-2xl glass overflow-hidden"
+            onMouseEnter={() => (isHoveringRef.current = true)}
+            onMouseLeave={() => (isHoveringRef.current = false)}
+          >
+            {/* Slides */}
+            <div
+              className="h-full w-full"
+              style={{ position: "relative" }}
+            >
+              {slides.map((s, idx) => (
+                <img
+                  key={idx}
+                  src={s.src}
+                  alt={s.alt || ""}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                    idx === i ? "opacity-100" : "opacity-0"
+                  }`}
+                  loading="lazy"
+                />
+              ))}
+            </div>
+
+            {/* Flechas */}
+            <button
+              aria-label="Anterior"
+              onClick={() => go(-1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2"
+            >
+              ◀
+            </button>
+            <button
+              aria-label="Siguiente"
+              onClick={() => go(1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2"
+            >
+              ▶
+            </button>
+
+            {/* Dots */}
+            <div className="absolute left-0 right-0 bottom-2 flex items-center justify-center gap-2">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  title={`Ir a slide ${idx + 1}`}
+                  onClick={() => goTo(idx)}
+                  className={`h-2.5 rounded-full transition-all ${
+                    idx === i ? "w-6 bg-sky-400" : "w-2.5 bg-white/40 hover:bg-white/70"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
     function TopBar({ onNavigate, cartCount, current }){
       return (
@@ -866,6 +955,7 @@
 
 
        
+
 
 
 
