@@ -136,7 +136,7 @@
               <Features />
               <CTA onNavigate={setRoute} />
             </>}
-            {route==='products' && <Catalog onNavigate={setRoute} cart={cart} setCart={setCart} />}
+        {route==='products' && <Catalog onNavigate={setRoute} cart={cart} setCart={setCart} />}
             {route==='cart' && <Cart cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='checkout' && <Checkout cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='chatbot' && <Chatbot />}
@@ -150,6 +150,41 @@
     }
 
     // ===== UI =====
+    function PromoBanner({ onNavigate }) {
+  return (
+    <section className="mb-6">
+      <div className="relative overflow-hidden rounded-3xl border supports-[backdrop-filter]:bg-white/40 bg-white/50 backdrop-blur-xl border-white/60 shadow-md p-6 sm:p-10">
+        <div className="absolute inset-0 pointer-events-none"
+             style={{background:
+               'radial-gradient(60% 60% at 10% 10%, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0) 60%), radial-gradient(50% 50% at 90% 20%, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0) 60%)'
+             }} />
+        <div className="relative grid md:grid-cols-2 gap-6 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-full bg-sky-100 text-sky-700">🔥 Lanzamiento</div>
+            <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
+            <p className="mt-2 text-slate-700">
+              Aquí puedes poner tu mensaje promocional, un pequeño video o un carrusel (placeholder listo).
+            </p>
+            <div className="mt-4 flex gap-3">
+              <button onClick={()=>onNavigate('products')}
+                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-600 to-emerald-500 text-white font-semibold shadow hover:shadow-lg active:scale-[.99]">
+                Ver ofertas
+              </button>
+              <button onClick={()=>onNavigate('chatbot')}
+                className="px-5 py-3 rounded-2xl border bg-white/60">
+                Hablar con soporte
+              </button>
+            </div>
+          </div>
+          <div className="aspect-video rounded-2xl border border-white/60 bg-white/70 grid place-items-center text-slate-400">
+            <span className="text-sm">🔲 Área para tu banner/creativo</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
     function TopBar({ onNavigate, cartCount }){
       return (
         <header className="fixed top-0 left-0 right-0 z-40 supports-[backdrop-filter]:bg-white/50 bg-white/70 backdrop-blur-xl border-b border-white/60 shadow">
@@ -767,6 +802,7 @@
 </html>
 
        
+
 
 
 
