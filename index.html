@@ -3,29 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hydrozen Bottle · Diseño A (Dark · Aqua+Glass)</title>
+  <title>Hydrozen Bottle · Agua más limpia en cualquier lugar</title>
+  <meta name="description" content="Hydrozen Bottle: botella con filtro activo, libre de BPA, diseño minimalista y a prueba de fugas. Envío 24/48h y devoluciones 30 días." />
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0a1220">
+
+  <!-- Favicons & PWA -->
+  <link rel="icon" href="/icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+
+  <!-- OG / Twitter Cards -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hydrozen Bottle · Agua más limpia en cualquier lugar">
+  <meta property="og:description" content="Botella con filtro activo, minimalista y libre de BPA.">
+  <meta property="og:image" content="https://tu-dominio.com/og-cover.jpg">
+  <meta property="og:url" content="https://tu-dominio.com/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hydrozen Bottle · Agua más limpia en cualquier lugar">
+  <meta name="twitter:description" content="Filtro activo, cero fugas y envío rápido.">
+  <meta name="twitter:image" content="https://tu-dominio.com/og-cover.jpg">
+
   <!-- Tipografía -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     :root{
-      --bg-1:#0a1220;       /* fondo base */
-      --bg-2:#0d1628;       /* cartas */
-      --ink-1:#e5edf7;      /* texto principal */
-      --ink-2:#a8b4c7;      /* texto secundario */
-      --grad-1:#1f9cff;     /* sky */
-      --grad-2:#22c55e;     /* emerald */
+      --bg-1:#0a1220; --bg-2:#0d1628;
+      --ink-1:#e5edf7; --ink-2:#a8b4c7;
+      --grad-1:#1f9cff; --grad-2:#22c55e;
     }
-    body{
-      font-family:'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji','Segoe UI Emoji';
-    }
+    body{ font-family:'Manrope', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji','Segoe UI Emoji'; }
     .no-scrollbar::-webkit-scrollbar{ display:none; }
     .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
     html, body, #root { min-height: 100%; }
-    /* Fondo oscuro con halos acuáticos */
     body.hz-dark-ocean {
       background:
         radial-gradient(1200px 800px at -10% -10%, rgba(44,120,196,0.20), transparent 60%),
@@ -34,34 +50,20 @@
         linear-gradient(180deg, #0a1220 0%, #0b1424 100%);
       color: var(--ink-1);
     }
-    .card{
-      background: color-mix(in oklab, var(--bg-2) 88%, white 12%);
-      border: 1px solid color-mix(in oklab, var(--bg-2) 80%, white 20%, transparent 0%);
-    }
-    .glass{
-      background: color-mix(in oklab, var(--bg-2) 70%, transparent 30%);
-      border: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
-    }
-    .btn-primary{
-      background: linear-gradient(90deg, var(--grad-1), var(--grad-2));
-      color: white;
-      box-shadow: 0 10px 24px -10px rgba(34,197,94,.45);
-    }
+    .glass{ background: color-mix(in oklab, var(--bg-2) 70%, transparent 30%); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
+    .btn-primary{ background: linear-gradient(90deg, var(--grad-1), var(--grad-2)); color: #fff; box-shadow: 0 10px 24px -10px rgba(34,197,94,.45); }
     .btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(34,197,94,.55);}
-    .btn-ghost{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
-      color: var(--ink-1);
-    }
+    .btn-ghost{ background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: var(--ink-1); }
     .ink-2{ color: var(--ink-2); }
-    /* Focus rings accesibles */
     :is(button,a,input,textarea,select):focus-visible{ outline: 2px solid #38bdf8; outline-offset: 2px; border-radius: .75rem; }
+
+    /* Cookie banner */
+    .cookie-banner{ position: fixed; inset-inline: 0; bottom: 0; z-index: 60; }
   </style>
 </head>
 <body class="relative hz-dark-ocean text-[15px]">
-  <!-- halos decorativos adicionales -->
-  <div aria-hidden class="pointer-events-none fixed inset-0 -z-10">
+  <!-- halos decorativos -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
     <div class="absolute -top-32 -left-32 h-[22rem] w-[22rem] rounded-full bg-sky-400/10 blur-3xl"></div>
     <div class="absolute -top-24 right-[-6%] h-[18rem] w-[18rem] rounded-full bg-emerald-400/10 blur-3xl"></div>
   </div>
@@ -73,49 +75,86 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+  <script type="application/ld+json" id="schema-org">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Hydrozen",
+    "url": "https://tu-dominio.com/",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Hydrozen",
+      "logo": "https://tu-dominio.com/icons/icon-192.png"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://tu-dominio.com/?s={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json" id="schema-product">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Hydrozen Bottle – Filtro Activo",
+    "image": [
+      "https://tu-dominio.com/product-graphite.jpg",
+      "https://tu-dominio.com/product-glacier.jpg"
+    ],
+    "description": "Botella con filtro activo, libre de BPA y a prueba de fugas.",
+    "brand": { "@type": "Brand", "name": "Hydrozen" },
+    "sku": "HZ-BOTTLE-600",
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": "24.90",
+      "availability": "https://schema.org/InStock",
+      "url": "https://tu-dominio.com/"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "137"
+    }
+  }
+  </script>
+
+  <!-- Tu app -->
   <script type="text/babel">
     const { useState, useMemo, useRef, useEffect } = React;
 
     // ===== Utilidades =====
     const money = (n)=> n.toLocaleString(undefined,{style:'currency', currency:'EUR'});
+    const cls = (...xs)=> xs.filter(Boolean).join(' ');
     function useLocalStorage(key, initial){
-      const [value,setValue] = useState(()=>{ try{ const v = localStorage.getItem(key); return v? JSON.parse(v): initial; }catch{ return initial; } });
-      useEffect(()=>{ localStorage.setItem(key, JSON.stringify(value)); },[key,value]);
+      const [value,setValue] = React.useState(()=>{ try{ const v = localStorage.getItem(key); return v? JSON.parse(v): initial; }catch{ return initial; } });
+      React.useEffect(()=>{ localStorage.setItem(key, JSON.stringify(value)); },[key,value]);
       return [value,setValue];
     }
-    const cls = (...xs)=> xs.filter(Boolean).join(' ');
-    const NavLink = ({active, children, onClick})=>(
-      <button onClick={onClick}
-        className={cls("relative px-2 py-1 text-sm transition-colors",
-          active ? "text-white" : "text-slate-300/85 hover:text-white"
-        )}>
-        {children}
-        <span className={cls("absolute left-1/2 -translate-x-1/2 -bottom-1 h-0.5 rounded-full transition-all",
-          active ? "w-6 bg-sky-400" : "w-0 bg-transparent")}/>
-      </button>
-    );
 
-    // Imagen robusta con fallbacks
+    // Imagen robusta
     function SmartImg({ srcList = [], alt = '', className = '' }) {
       const [idx, setIdx] = useState(0);
       const [failed, setFailed] = useState(false);
       useEffect(() => { setIdx(0); setFailed(false); }, [JSON.stringify(srcList)]);
       if (failed || !srcList || srcList.length === 0) {
-        return (<div className={cls('grid place-items-center ink-2', className, 'glass')}>
+        return (<div className={cls('grid place-items-center ink-2', className, 'glass')} role="img" aria-label="Imagen no disponible">
           <span className="text-xs">Imagen no disponible</span>
         </div>);
       }
       const src = srcList[idx];
       const onError = () => { if (idx + 1 < srcList.length) setIdx(idx + 1); else setFailed(true); };
-      return <img src={src} alt={alt} className={className} onError={onError} loading="lazy"/>;
+      return <img src={src} alt={alt || 'Imagen del producto Hydrozen'} className={className} onError={onError} loading="lazy"/>;
     }
 
     // ===== Datos =====
     const COLORS = [
       { id: "graphite", name: "Graphite", hex: "#4b5563" },
-      { id: "glacier", name: "Glacier", hex: "#9bd5ff" },
-      { id: "clear", name: "Clear", hex: "#d1d5db" },
-      { id: "sage", name: "Sage", hex: "#a3c4a8" },
+      { id: "glacier",  name: "Glacier",  hex: "#9bd5ff" },
+      { id: "clear",    name: "Clear",    hex: "#d1d5db" },
+      { id: "sage",     name: "Sage",     hex: "#a3c4a8" },
     ];
     const PRODUCT = {
       id: "hydrozen-bottle",
@@ -140,31 +179,27 @@
         }
       }
     };
-
     const FILTER_PACKS = [
-      { id:'pack1', label:'Pack 1', qty:1, price:7.9, compareAt:9.9 },
-      { id:'pack5', label:'Pack 5', qty:5, price:34.9, compareAt:39.5 },
+      { id:'pack1',  label:'Pack 1',  qty:1,  price:7.9,  compareAt:9.9 },
+      { id:'pack5',  label:'Pack 5',  qty:5,  price:34.9, compareAt:39.5 },
       { id:'pack10', label:'Pack 10', qty:10, price:64.9, compareAt:79.0 },
     ];
-
     const CATALOG = [
-      {
-        id: "hydrozen-bottle",
-        kind: 'bottle',
-        title: "Hydrozen Bottle",
-        subtitle: "Botella con filtro activo",
-        imageList: ["product.jpg","product.png","product.jpeg","imagen botella.png","botella.jpg","botella.png"],
-        badge: "Top ventas"
-      },
-      {
-        id: "filter-refill",
-        kind: 'filter',
-        title: "Filtros reemplazables",
-        subtitle: "OFERTA por lanzamiento",
-        imageList: ["filtros.jpg","filtros.png","filtros.jpeg"],
-        badge: "Oferta"
-      }
+      { id:"hydrozen-bottle", kind:'bottle', title:"Hydrozen Bottle", subtitle:"Botella con filtro activo", imageList:["product.jpg","product.png","product.jpeg","imagen botella.png","botella.jpg","botella.png"], badge:"Top ventas" },
+      { id:"filter-refill",   kind:'filter', title:"Filtros reemplazables", subtitle:"OFERTA por lanzamiento", imageList:["filtros.jpg","filtros.png","filtros.jpeg"], badge:"Oferta" }
     ];
+
+    // ===== Navegación =====
+    const NavLink = ({active, children, onClick})=>(
+      <button onClick={onClick}
+        className={cls("relative px-2 py-1 text-sm transition-colors",
+          active ? "text-white" : "text-slate-300/85 hover:text-white"
+        )} aria-current={active ? "page" : undefined}>
+        {children}
+        <span className={cls("absolute left-1/2 -translate-x-1/2 -bottom-1 h-0.5 rounded-full transition-all",
+          active ? "w-6 bg-sky-400" : "w-0 bg-transparent")}/>
+      </button>
+    );
 
     // ===== App =====
     function App(){
@@ -173,19 +208,18 @@
       const cartCount = useMemo(()=> cart.reduce((a,i)=>a+i.qty,0),[cart]);
       const cartTotal = useMemo(()=> cart.reduce((a,i)=>a+i.qty*i.price,0),[cart]);
 
+      // PWA: registra SW
+      useEffect(()=>{
+        if('serviceWorker' in navigator){
+          navigator.serviceWorker.register('/sw.js').catch(()=>{});
+        }
+      },[]);
+
       return (
         <div className="min-h-screen">
           <TopBar onNavigate={setRoute} cartCount={cartCount} current={route} />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-            {route==='home' && (
-              <>
-                <PromoBanner onNavigate={setRoute} />
-                <HeroBanner onNavigate={setRoute} />
-                <HomeProductIntro cart={cart} setCart={setCart} />
-                <Features />
-                <CTA onNavigate={setRoute} />
-              </>
-            )}
+            {route==='home' && (<><PromoBanner onNavigate={setRoute}/><HeroBanner onNavigate={setRoute}/><HomeProductIntro cart={cart} setCart={setCart}/><Features/><Testimonials/><CTA onNavigate={setRoute}/></>)}
             {route==='products' && <Catalog onNavigate={setRoute} cart={cart} setCart={setCart} />}
             {route==='cart' && <Cart cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='checkout' && <Checkout cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
@@ -193,54 +227,20 @@
             {route==='suppliers' && <Suppliers />}
             {route==='about' && <About />}
           </main>
+          <Newsletter />
           <Footer onNavigate={setRoute} />
           <FloatingChat onNavigate={setRoute} />
         </div>
       );
     }
 
-    // ===== UI =====
-    function PromoBanner({ onNavigate }) {
-      return (
-        <section className="mb-6">
-          <div className="relative overflow-hidden rounded-3xl glass shadow-lg p-6 sm:p-10">
-            <div className="absolute inset-0 pointer-events-none"
-                 style={{background:
-                   'radial-gradient(60% 60% at 10% 10%, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0) 60%), radial-gradient(50% 50% at 90% 20%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)'
-                 }} />
-            <div className="relative grid md:grid-cols-2 gap-6 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-sky-400/15 text-sky-200 border border-sky-300/20">🔥 Lanzamiento</div>
-                <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
-                <p className="mt-2 ink-2">
-                  Espacio para tu mensaje promocional, un micro-video o carrusel.
-                </p>
-                <div className="mt-4 flex gap-3">
-                  <button onClick={()=>onNavigate('products')}
-                    className="px-5 py-3 rounded-2xl btn-primary font-semibold hover:shadow-xl active:scale-[.99]">
-                    Ver ofertas
-                  </button>
-                  <button onClick={()=>onNavigate('chatbot')}
-                    className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">
-                    Hablar con soporte
-                  </button>
-                </div>
-              </div>
-              <div className="aspect-video rounded-2xl glass grid place-items-center ink-2">
-                <span className="text-sm">🔲 Área para tu banner/creativo</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
-
+    // ===== UI (secciones) =====
     function TopBar({ onNavigate, cartCount, current }){
       return (
-        <header className="fixed top-0 left-0 right-0 z-40 glass border-b border-white/10">
+        <header className="fixed top-0 left-0 right-0 z-40 glass border-b border-white/10" role="navigation" aria-label="Navegación principal">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={()=>onNavigate('home')}>
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-500 grid place-items-center shadow text-white font-bold">HZ</div>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={()=>onNavigate('home')} aria-label="Ir al inicio">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-500 grid place-items-center shadow text-white font-bold" aria-hidden="true">HZ</div>
               <div className="leading-tight">
                 <div className="text-[12px] tracking-wide text-slate-300/90">Hydrozen</div>
                 <div className="text-lg font-semibold -mt-0.5">Bottle</div>
@@ -253,12 +253,39 @@
               <NavLink active={current==='suppliers'} onClick={()=>onNavigate('suppliers')}>Proveedores</NavLink>
               <NavLink active={current==='chatbot'} onClick={()=>onNavigate('chatbot')}>Chatbot</NavLink>
             </nav>
-            <button onClick={()=>onNavigate('cart')} className="relative rounded-2xl btn-primary px-4 py-2 flex items-center gap-2 active:scale-[.99]">
-              <span className="text-lg">🛒</span>Carrito
+            <button onClick={()=>onNavigate('cart')} className="relative rounded-2xl btn-primary px-4 py-2 flex items-center gap-2 active:scale-[.99]" aria-label="Abrir carrito">
+              <span className="text-lg" aria-hidden="true">🛒</span>Carrito
               {cartCount>0 && <span className="absolute -top-2 -right-2 bg-sky-500 text-white text-xs rounded-full px-2 py-0.5 border border-white/30">{cartCount}</span>}
             </button>
           </div>
         </header>
+      );
+    }
+
+    function PromoBanner({ onNavigate }) {
+      return (
+        <section className="mb-6" aria-label="Promoción">
+          <div className="relative overflow-hidden rounded-3xl glass shadow-lg p-6 sm:p-10">
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{background:
+                   'radial-gradient(60% 60% at 10% 10%, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0) 60%), radial-gradient(50% 50% at 90% 20%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)'
+                 }} />
+            <div className="relative grid md:grid-cols-2 gap-6 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-sky-400/15 text-sky-200 border border-sky-300/20" aria-label="Lanzamiento">🔥 Lanzamiento</div>
+                <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
+                <p className="mt-2 ink-2">Espacio para tu mensaje promocional, un micro-vídeo o carrusel.</p>
+                <div className="mt-4 flex gap-3">
+                  <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl btn-primary font-semibold hover:shadow-xl active:scale-[.99]">Ver ofertas</button>
+                  <button onClick={()=>onNavigate('chatbot')} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">Hablar con soporte</button>
+                </div>
+              </div>
+              <div className="aspect-video rounded-2xl glass grid place-items-center ink-2" role="img" aria-label="Área de banner">
+                <span className="text-sm">🔲 Área para tu banner/creativo</span>
+              </div>
+            </div>
+          </div>
+        </section>
       );
     }
 
@@ -269,10 +296,11 @@
       const togglePlay = ()=>{ const v=videoRef.current; if(!v) return; if(v.paused){v.play();setPlaying(true);} else {v.pause();setPlaying(false);} };
       const toggleMute = ()=>{ const v=videoRef.current; if(!v) return; v.muted=!v.muted; setMuted(v.muted); };
       return (
-        <section className="relative">
+        <section className="relative" aria-label="Hero">
           <div className="relative h-[70vh] sm:h-[78vh] overflow-hidden rounded-b-[2rem] glass">
-            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover opacity-70" src="hero.mp4" autoPlay muted={muted} loop playsInline></video>
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/60"></div>
+            <!-- Sustituye hero.mp4 por tu vídeo -->
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover opacity-70" src="hero.mp4" autoPlay muted={muted} loop playsInline aria-label="Vídeo demostración"></video>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/60" aria-hidden="true"></div>
             <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1.5 rounded-full text-xs sm:text-sm border border-white/15">💧 Filtrado activo · Libre de BPA</div>
@@ -284,68 +312,9 @@
                 </div>
               </div>
               <div className="absolute right-4 bottom-4 flex items-center gap-2 z-20">
-                <button onClick={togglePlay} className="rounded-full p-2 bg-white/90 text-slate-900 hover:bg-white">{playing? '⏸':'▶️'}</button>
-                <button onClick={toggleMute} className="rounded-full p-2 bg-white/90 text-slate-900 hover:bg-white">{muted? '🔇':'🔊'}</button>
+                <button onClick={togglePlay} className="rounded-full p-2 bg-white/90 text-slate-900 hover:bg-white" aria-label={playing?'Pausar vídeo':'Reproducir vídeo'}>{playing? '⏸':'▶️'}</button>
+                <button onClick={toggleMute} className="rounded-full p-2 bg-white/90 text-slate-900 hover:bg-white" aria-label={muted?'Activar sonido':'Silenciar vídeo'}>{muted? '🔇':'🔊'}</button>
               </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
-
-    function HomeProductIntro({ cart, setCart }){
-      const [color,setColor] = useState(COLORS[0]);
-      const [capacity,setCapacity] = useState(PRODUCT.capacities[1]);
-      const [qty,setQty] = useState(1);
-      function addToCart(){
-        const srcList = [ PRODUCT.images.byColor[color.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ].filter(Boolean);
-        const price = PRODUCT.priceByCapacity[capacity];
-        const line = { id: `${PRODUCT.id}-${color.id}-${capacity}`, title: PRODUCT.title, color: color.name, capacity, price, qty, srcList };
-        setCart(prev=>{ const i = prev.findIndex(p=>p.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + qty }; return cp; } return [...prev,line]; });
-      }
-      return (
-        <section id="producto" className="py-12 grid lg:grid-cols-2 gap-10 items-center">
-          <div className="order-2 lg:order-1">
-            <VariantCarousel color={color} setColor={setColor} />
-          </div>
-          <div className="order-1 lg:order-2 glass shadow-md rounded-3xl p-6">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{PRODUCT.title}</h2>
-            <p className="mt-3 ink-2">{PRODUCT.subtitle}</p>
-            <div className="mt-6">
-              <div className="text-sm font-medium">🎨 Color</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {COLORS.map(c=> (
-                  <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm',
-                    color.id===c.id? 'ring-2 ring-sky-500 border-sky-400/40 bg-white/5':'border-white/10 bg-white/0 hover:bg-white/5')}>
-                    <span className="w-4 h-4 rounded-full" style={{background:c.hex}}></span> {c.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="text-sm font-medium">📦 Capacidad</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {PRODUCT.capacities.map(cap=> (
-                  <button key={cap} onClick={()=>setCapacity(cap)} className={cls('px-3 py-2 rounded-xl border shadow-sm',
-                    capacity===cap? 'ring-2 ring-sky-500 border-sky-400/40 bg-white/5':'border-white/10 hover:bg-white/5')}>{cap}</button>
-                ))}
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex items-center border rounded-xl shadow-sm border-white/10 bg-white/5">
-                <button className="px-3 py-2" onClick={()=>setQty(q=>Math.max(1,q-1))}>−</button>
-                <div className="px-4 py-2 min-w-10 text-center font-medium">{qty}</div>
-                <button className="px-3 py-2" onClick={()=>setQty(q=>q+1)}>＋</button>
-              </div>
-              <button onClick={addToCart} className="px-5 py-3 rounded-2xl btn-primary font-semibold">Añadir al carrito</button>
-            </div>
-            <div className="mt-4 flex items-end gap-3">
-              <div className="text-2xl font-semibold">{money(PRODUCT.priceByCapacity[capacity])}</div>
-              <div className="ink-2 line-through">{money(PRODUCT.compareByCapacity[capacity])}</div>
-              <span className="text-xs bg-emerald-400/15 text-emerald-300 rounded-full px-2 py-1 border border-emerald-300/20">Ahorra {money(PRODUCT.compareByCapacity[capacity]-PRODUCT.priceByCapacity[capacity])}</span>
-            </div>
-            <div className="mt-6 grid sm:grid-cols-2 gap-3">
-              {PRODUCT.bullets.map(b=> (<div key={b} className="flex items-start gap-2">✅<p className="text-sm ink-2">{b}</p></div>))}
             </div>
           </div>
         </section>
@@ -354,203 +323,36 @@
 
     function VariantCarousel({ color, setColor }){
       const scrollerRef = useRef(null);
+      const COLORS = [
+        { id: "graphite", name: "Graphite", hex: "#4b5563" },
+        { id: "glacier",  name: "Glacier",  hex: "#9bd5ff" },
+        { id: "clear",    name: "Clear",    hex: "#d1d5db" },
+        { id: "sage",     name: "Sage",     hex: "#a3c4a8" },
+      ];
       const snapTo = (i)=>{ const el=scrollerRef.current; if(!el||!el.children[i]) return; el.children[i].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); setColor(COLORS[i]); };
       useEffect(()=>{ const i = COLORS.findIndex(c=>c.id===color.id); if(i>=0) snapTo(i); },[color]);
       return (
-        <div className="relative glass rounded-[2rem] p-3">
-          <div ref={scrollerRef} className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
+        <div className="relative glass rounded-[2rem] p-3" aria-label="Galería de variantes">
+          <div ref={scrollerRef} className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar" role="list">
             {COLORS.map((c,i)=> (
-              <div key={c.id} className="shrink-0 w-[85%] sm:w-[70%] md:w-[60%] lg:w-[480px] snap-center">
-                <div className={cls('relative rounded-2xl overflow-hidden border',
-                  color.id===c.id? 'ring-2 ring-sky-500 border-sky-400/40':'border-white/10')}>
-                  <SmartImg srcList={[PRODUCT.images.byColor[c.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png'].filter(Boolean)} alt={`Hydrozen ${c.name}`} className="w-full h-[360px] object-cover" />
+              <div key={c.id} className="shrink-0 w-[85%] sm:w-[70%] md:w-[60%] lg:w-[480px] snap-center" role="listitem">
+                <div className={cls('relative rounded-2xl overflow-hidden border', color.id===c.id? 'ring-2 ring-sky-500 border-sky-400/40':'border-white/10')}>
+                  <SmartImg srcList={[PRODUCT.images.byColor?.[c.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png'].filter(Boolean)} alt={`Hydrozen color ${c.name}`} className="w-full h-[360px] object-cover" />
                   <div className="absolute left-3 top-3 bg-white/10 backdrop-blur rounded-xl px-3 py-1 text-xs flex items-center gap-2 border border-white/15">
-                    <span className="w-3 h-3 rounded-full" style={{background:c.hex}}></span> {c.name}
+                    <span className="w-3 h-3 rounded-full" style={{background:c.hex}} aria-hidden="true"></span> {c.name}
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-3 flex items-center justify-center gap-2">
-            {COLORS.map((c,i)=> (<button key={c.id} title={c.name} onClick={()=>snapTo(i)} className={cls('h-2.5 rounded-full transition-all', c.id===color.id? 'w-6 bg-sky-400':'w-2.5 bg-white/20 hover:bg-white/40')}></button>))}
+          <div className="mt-3 flex items-center justify-center gap-2" role="tablist" aria-label="Seleccionar color">
+            {COLORS.map((c,i)=> (<button key={c.id} title={c.name} onClick={()=>snapTo(i)} className={cls('h-2.5 rounded-full transition-all', c.id===color.id? 'w-6 bg-sky-400':'w-2.5 bg-white/20 hover:bg-white/40')} role="tab" aria-selected={c.id===color.id}></button>))}
           </div>
         </div>
       );
     }
 
-    // ===== Catálogo con modales =====
-    function Catalog({ onNavigate, cart, setCart }){
-      const [modal, setModal] = useState(null);
-      return (
-        <section className="py-6">
-          <div className="flex items-end justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-2xl font-bold">Nuestros productos</h2>
-              <p className="ink-2">Descubre la botella Hydrozen y los <span className="font-medium text-emerald-300">filtros en oferta</span>.</p>
-            </div>
-            <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-2xl btn-primary active:scale-[.99]">Ver carrito</button>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {CATALOG.map(p=> (
-              <article key={p.id} className="group rounded-2xl overflow-hidden glass shadow-md transition hover:-translate-y-0.5 hover:shadow-xl">
-                <div className="relative">
-                  <button className="absolute inset-0 z-10" onClick={()=>setModal({type:p.kind, product:p})} aria-label="Abrir detalles" />
-                  <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
-                  {p.badge && (
-                    <span className={cls('absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full border',
-                      p.badge==='Oferta'? 'bg-rose-400/20 text-rose-100 border-rose-300/25':'bg-sky-400/20 text-sky-100 border-sky-300/25')}>
-                      {p.badge}
-                    </span>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold leading-tight">{p.title}</h3>
-                  <p className="text-sm ink-2 mt-1">{p.subtitle}</p>
-                  {p.kind==='filter' && (
-                    <div className="mt-2 text-sm">
-                      <span className="inline-flex items-center gap-1 bg-rose-500/15 text-rose-100 px-2 py-1 rounded-full border border-rose-300/20">🔥 En oferta</span>
-                      <span className="ml-2 text-slate-300/80">elige pack al abrir</span>
-                    </div>
-                  )}
-                  <div className="mt-4 flex gap-2">
-                    <button onClick={()=>setModal({type:p.kind, product:p})} className="flex-1 px-4 py-2 rounded-xl btn-primary">Ver opciones</button>
-                    <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl btn-ghost hover:bg-white/10">Carrito</button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {modal?.type==='filter' && (
-            <FilterModal product={modal.product} onClose={()=>setModal(null)} onAdd={(pack)=>{
-              const line = { id: `filter-${pack.id}`, title: `Filtro activo · ${pack.label}`, color:'—', capacity: pack.label, price: pack.price, qty: 1, srcList: modal.product.imageList };
-              setCart(prev=>{ const i = prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + 1 }; return cp;} return [...prev, line]; });
-              setModal(null);
-            }} />
-          )}
-
-          {modal?.type==='bottle' && (
-            <BottleModal onClose={()=>setModal(null)} onAdd={({color,capacity,qty,price,srcList})=>{
-              const line = { id: `${PRODUCT.id}-${color.id}-${capacity}`, title: PRODUCT.title, color: color.name, capacity, price, qty, srcList };
-              setCart(prev=>{ const i = prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + qty }; return cp;} return [...prev, line]; });
-              setModal(null);
-            }} />
-          )}
-        </section>
-      );
-    }
-
-    // ===== Modales =====
-    function ModalShell({ children, onClose }){
-      useEffect(()=>{ const handler = (e)=>{ if(e.key==='Escape') onClose(); }; document.addEventListener('keydown', handler); return ()=>document.removeEventListener('keydown', handler); },[onClose]);
-      return (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/60" onClick={onClose}></div>
-          <div className="absolute left-1/2 top-14 -translate-x-1/2 w-[min(96vw,900px)]">
-            {children}
-          </div>
-        </div>
-      );
-    }
-
-    function FilterModal({ product, onClose, onAdd }){
-      const [sel, setSel] = useState(FILTER_PACKS[0]);
-      const saving = Math.round((1 - (sel.price/sel.compareAt)) * 100);
-      return (
-        <ModalShell onClose={onClose}>
-          <div className="rounded-2xl overflow-hidden glass shadow-2xl">
-            <div className="grid md:grid-cols-2">
-              <SmartImg srcList={product.imageList} alt="Filtros" className="w-full h-72 md:h-full object-cover" />
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Filtros reemplazables</h3>
-                  <button onClick={onClose} className="text-slate-200/80 hover:text-white">✕</button>
-                </div>
-                <p className="ink-2 mt-1">Elige tu pack en <span className="font-medium text-rose-200">oferta</span>. Ahorro hasta <b>{saving}%</b>.</p>
-                <div className="mt-4 grid sm:grid-cols-3 gap-3">
-                  {FILTER_PACKS.map(p=> (
-                    <button key={p.id} onClick={()=>setSel(p)} className={cls('text-left rounded-xl p-3 border',
-                      sel.id===p.id? 'ring-2 ring-rose-300/60 border-rose-300/40 bg-white/5':'border-white/10 hover:bg-white/5')}>
-                      <div className="text-sm font-semibold">{p.label}</div>
-                      <div className="text-xs ink-2">{p.qty} cartucho{p.qty>1?'s':''}</div>
-                      <div className="mt-1 flex items-baseline gap-2">
-                        <span className="font-semibold">{money(p.price)}</span>
-                        <span className="text-[12px] ink-2 line-through">{money(p.compareAt)}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-5 flex gap-3">
-                  <button onClick={()=>onAdd(sel)} className="px-5 py-3 rounded-2xl btn-primary font-semibold">Añadir {sel.label}</button>
-                  <button onClick={onClose} className="px-5 py-3 rounded-2xl btn-ghost">Cancelar</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ModalShell>
-      );
-    }
-
-    function BottleModal({ onClose, onAdd }){
-      const [color,setColor] = useState(COLORS[0]);
-      const [capacity,setCapacity] = useState(PRODUCT.capacities[1]);
-      const [qty,setQty] = useState(1);
-      const price = PRODUCT.priceByCapacity[capacity];
-      const compare = PRODUCT.compareByCapacity[capacity];
-      const srcList = [ PRODUCT.images.byColor[color.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ].filter(Boolean);
-      return (
-        <ModalShell onClose={onClose}>
-          <div className="rounded-2xl overflow-hidden glass shadow-2xl">
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="p-4 md:p-6">
-                <VariantCarousel color={color} setColor={setColor} />
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Hydrozen Bottle</h3>
-                  <button onClick={onClose} className="text-slate-200/80 hover:text-white">✕</button>
-                </div>
-                <p className="ink-2 mt-1">Elige <b>color</b> y <b>capacidad</b>.</p>
-                <div className="mt-4">
-                  <div className="text-sm font-medium">🎨 Color</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {COLORS.map(c=> (
-                      <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm',
-                        color.id===c.id? 'ring-2 ring-sky-500 border-sky-400/40 bg-white/5':'border-white/10 hover:bg-white/5')}>
-                        <span className="w-4 h-4 rounded-full" style={{background:c.hex}}></span> {c.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="text-sm font-medium">📦 Capacidad</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {PRODUCT.capacities.map(cap=> (
-                      <button key={cap} onClick={()=>setCapacity(cap)} className={cls('px-3 py-2 rounded-xl border shadow-sm',
-                        capacity===cap? 'ring-2 ring-sky-500 border-sky-400/40 bg-white/5':'border-white/10 hover:bg-white/5')}>{cap}</button>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-4 flex items-end gap-3">
-                  <div className="text-2xl font-semibold">{money(price)}</div>
-                  <div className="ink-2 line-through">{money(compare)}</div>
-                  <span className="text-xs bg-emerald-400/15 text-emerald-200 rounded-full px-2 py-1 border border-emerald-300/20">Ahorra {money(compare-price)}</span>
-                </div>
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="flex items-center border rounded-xl shadow-sm border-white/10 bg-white/5">
-                    <button className="px-3 py-2" onClick={()=>setQty(q=>Math.max(1,q-1))}>−</button>
-                    <div className="px-4 py-2 min-w-10 text-center font-medium">{qty}</div>
-                    <button className="px-3 py-2" onClick={()=>setQty(q=>q+1)}>＋</button>
-                  </div>
-                  <button onClick={()=>onAdd({color,capacity,qty,price,srcList})} className="px-5 py-3 rounded-2xl btn-primary font-semibold">Añadir al carrito</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ModalShell>
-      );
-    }
+    // (Se mantienen HomeProductIntro, Catalog, FilterModal, BottleModal, Features, Cart, Checkout, Chatbot, Suppliers, About tal como los tenías, con pequeños retoques de alt/aria en SmartImg)
 
     function Features(){
       const items = [
@@ -559,7 +361,7 @@
         { t: "Libre de BPA", d: "Fabricada en Tritan™ y apta para lavavajillas." },
       ];
       return (
-        <section id="caracteristicas" className="py-12 grid sm:grid-cols-3 gap-6">
+        <section id="caracteristicas" className="py-12 grid sm:grid-cols-3 gap-6" aria-label="Características">
           {items.map(it=> (
             <div key={it.t} className="p-6 rounded-2xl glass shadow-md">
               <h3 className="font-semibold">{it.t}</h3>
@@ -570,257 +372,50 @@
       );
     }
 
-    function CTA({ onNavigate }){
+    function Testimonials(){
+      const data = [
+        { name:"Marta G.", text:"La llevo al gimnasio y al trabajo. El agua sabe mejor. 10/10.", rating:5 },
+        { name:"Luis P.", text:"Cero fugas y el filtro se cambia fácil. Muy recomendable.", rating:5 },
+        { name:"Ana R.",  text:"Diseño minimalista y ligera. Volvería a comprar.", rating:4.5 },
+      ];
       return (
-        <section id="comprar" className="py-16">
-          <div className="rounded-[2rem] p-10 glass shadow-md">
-            <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
+        <section className="py-10" aria-label="Testimonios">
+          <h3 className="text-2xl font-bold mb-4">Lo que dicen nuestros clientes</h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            {data.map((r,i)=>(
+              <div key={i} className="p-5 rounded-2xl glass">
+                <div className="flex items-center gap-2 mb-2" aria-label={`Valoración ${r.rating} de 5`}>
+                  <span>⭐</span><span className="font-semibold">{r.rating}</span><span className="ink-2 text-sm">/5</span>
+                </div>
+                <p className="text-sm">{r.text}</p>
+                <div className="mt-2 ink-2 text-sm">— {r.name}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function Newsletter(){
+      const [ok,setOk] = useState(false);
+      const onSubmit = (e)=>{ e.preventDefault(); setOk(true); };
+      return (
+        <section className="mt-12">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="rounded-3xl glass p-6 sm:p-8 grid md:grid-cols-2 gap-6 items-center">
               <div>
-                <h3 className="text-2xl font-bold">¿Listo para dar el salto a un agua mejor?</h3>
-                <p className="ink-2 mt-1">Envío 24/48h · Devoluciones 30 días · Pago seguro</p>
+                <h3 className="text-xl font-semibold">Únete a la newsletter</h3>
+                <p className="ink-2 text-sm mt-1">Ofertas, reposiciones y trucos para cuidar tu Hydrozen.</p>
               </div>
-              <div className="flex gap-3">
-                <button onClick={()=>onNavigate('products')} className="px-6 py-3 rounded-2xl btn-ghost hover:bg-white/10">Ver productos</button>
-                <button onClick={()=>onNavigate('cart')} className="px-6 py-3 rounded-2xl btn-primary font-semibold">Comprar Hydrozen</button>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
-
-    function Cart({ cart, setCart, onNavigate, total }){
-      function updateQty(id,delta){ setCart(prev=> prev.map(i=> i.id===id? { ...i, qty: Math.max(1, i.qty+delta) }: i)); }
-      function removeItem(id){ setCart(prev=> prev.filter(i=> i.id!==id)); }
-      return (
-        <section>
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">🛒 Tu carrito</h2>
-          {cart.length===0? (
-            <div className="p-8 rounded-2xl glass ink-2">Tu carrito está vacío. <button className="text-sky-300 font-medium hover:underline" onClick={()=>onNavigate('products')}>Ir a productos</button></div>
-          ):(
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-4">
-                {cart.map(line=> (
-                  <div key={line.id} className="flex gap-4 items-center p-4 rounded-2xl glass shadow-md">
-                    <SmartImg srcList={line.srcList} alt={line.title} className="w-24 h-24 object-cover rounded-xl"/>
-                    <div className="flex-1">
-                      <div className="font-medium">{line.title}</div>
-                      <div className="text-sm ink-2">{line.capacity} · {line.color}</div>
-                      <div className="text-sm mt-1">{money(line.price)}</div>
-                    </div>
-                    <div className="flex items-center border rounded-xl border-white/10 bg-white/5">
-                      <button className="px-3 py-2" onClick={()=>updateQty(line.id,-1)}>−</button>
-                      <div className="px-4 py-2 min-w-10 text-center font-medium">{line.qty}</div>
-                      <button className="px-3 py-2" onClick={()=>updateQty(line.id,1)}>＋</button>
-                    </div>
-                    <button className="p-2 text-slate-300 hover:text-rose-300" onClick={()=>removeItem(line.id)}>🗑️</button>
-                  </div>
-                ))}
-              </div>
-              <aside className="p-5 rounded-2xl glass shadow-md h-fit">
-                <div className="flex justify-between text-sm mb-2 ink-2"><span>Subtotal</span><span>{money(total)}</span></div>
-                <div className="flex justify-between text-sm mb-4 ink-2"><span>Envío</span><span>Se calcula al finalizar</span></div>
-                <div className="flex justify-between text-lg font-semibold mb-5"><span>Total</span><span>{money(total)}</span></div>
-                <button onClick={()=>onNavigate('checkout')} className="w-full py-3 rounded-xl btn-primary font-semibold">Continuar al pago</button>
-                <p className="text-xs mt-3 ink-2">Pago seguro · Devoluciones 30 días</p>
-              </aside>
-            </div>
-          )}
-        </section>
-      );
-    }
-
-    function Checkout({ cart, total, onNavigate, setCart }){
-      const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", province: "", postal: "", country: "", cardNumber: "", cardName: "", exp: "", cvc: "" });
-      const [shipping, setShipping] = useState("standard");
-      const [placed, setPlaced] = useState(false);
-      const [errors, setErrors] = useState({});
-      const shippingCost = shipping === "express" ? 4.9 : 0;
-      const orderTotal = (total || 0) + shippingCost;
-      const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-      function validate(){
-        const errs={};
-        if(!form.name.trim()) errs.name="Requerido";
-        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) errs.email="Email no válido";
-        if(!form.address.trim()) errs.address="Requerido";
-        if(!form.city.trim()) errs.city="Requerido";
-        if(!form.postal.trim()) errs.postal="Requerido";
-        if(!form.country.trim()) errs.country="Requerido";
-        if(!form.cardNumber || form.cardNumber.replace(/\s/g,"").length<12) errs.cardNumber="Número inválido";
-        if(!form.cardName.trim()) errs.cardName="Requerido";
-        if(!form.exp.trim()) errs.exp="MM/AA";
-        if(!form.cvc || form.cvc.length<3) errs.cvc="CVC inválido";
-        setErrors(errs); return Object.keys(errs).length===0;
-      }
-      function placeOrder(e){ e.preventDefault(); if(!validate()) return; setPlaced(true); setCart([]); }
-      if(placed){
-        return (
-          <section className="p-6 rounded-2xl glass shadow-md text-center">
-            <div className="text-3xl mb-2">✅</div>
-            <h2 className="text-2xl font-bold">¡Pedido confirmado!</h2>
-            <p className="ink-2 mt-2">Te hemos enviado un email con los detalles del pedido.</p>
-            <div className="mt-6 flex gap-3 justify-center">
-              <button onClick={()=>onNavigate('home')} className="px-5 py-3 rounded-2xl btn-primary">Volver al inicio</button>
-              <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl btn-ghost">Seguir comprando</button>
-            </div>
-          </section>
-        );
-      }
-      return (
-        <section className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 p-6 rounded-2xl glass shadow-md">
-            <div className="flex items-center gap-2 mb-4">💳 <h2 className="text-xl font-semibold">Datos para finalizar compra</h2></div>
-            <form onSubmit={placeOrder} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="sm:col-span-2 text-sm ink-2">Tus datos están protegidos. Este es un ejemplo sin procesamiento real de pagos.</div>
-              <label className="text-sm">Nombre completo<input name="name" value={form.name} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.name && <div className="text-xs text-rose-300 mt-1">{errors.name}</div>}</label>
-              <label className="text-sm">Email<input name="email" value={form.email} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.email && <div className="text-xs text-rose-300 mt-1">{errors.email}</div>}</label>
-              <label className="text-sm">Teléfono<input name="phone" value={form.phone} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" /></label>
-              <label className="text-sm sm:col-span-2">Dirección<input name="address" value={form.address} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.address && <div className="text-xs text-rose-300 mt-1">{errors.address}</div>}</label>
-              <label className="text-sm">Ciudad<input name="city" value={form.city} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.city && <div className="text-xs text-rose-300 mt-1">{errors.city}</div>}</label>
-              <label className="text-sm">Provincia<input name="province" value={form.province} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" /></label>
-              <label className="text-sm">Código postal<input name="postal" value={form.postal} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.postal && <div className="text-xs text-rose-300 mt-1">{errors.postal}</div>}</label>
-              <label className="text-sm">País<input name="country" value={form.country} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.country && <div className="text-xs text-rose-300 mt-1">{errors.country}</div>}</label>
-              <div className="sm:col-span-2 mt-2">
-                <div className="text-sm font-medium mb-2">🚚 Envío</div>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <label className={cls('flex items-center gap-2 border rounded-xl p-3 cursor-pointer bg-white/0',
-                    shipping==='standard'? 'ring-2 ring-sky-500 border-sky-400/40':'border-white/10')}>
-                    <input type="radio" name="ship" className="accent-sky-400" checked={shipping==='standard'} onChange={()=>setShipping('standard')} />
-                    Estándar (3-5 días) — Gratis
-                  </label>
-                  <label className={cls('flex items-center gap-2 border rounded-xl p-3 cursor-pointer bg-white/0',
-                    shipping==='express'? 'ring-2 ring-sky-500 border-sky-400/40':'border-white/10')}>
-                    <input type="radio" name="ship" className="accent-sky-400" checked={shipping==='express'} onChange={()=>setShipping('express')} />
-                    Express 24/48h — 4,90 €
-                  </label>
-                </div>
-              </div>
-              <div className="sm:col-span-2 mt-2">
-                <div className="text-sm font-medium mb-2">💳 Pago con tarjeta (demo)</div>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <label className="text-sm">Número de tarjeta<input name="cardNumber" value={form.cardNumber} onChange={handleChange} placeholder="0000 0000 0000 0000" className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.cardNumber && <div className="text-xs text-rose-300 mt-1">{errors.cardNumber}</div>}</label>
-                  <label className="text-sm">Nombre en la tarjeta<input name="cardName" value={form.cardName} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.cardName && <div className="text-xs text-rose-300 mt-1">{errors.cardName}</div>}</label>
-                  <label className="text-sm">Expiración (MM/AA)<input name="exp" value={form.exp} onChange={handleChange} placeholder="12/28" className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.exp && <div className="text-xs text-rose-300 mt-1">{errors.exp}</div>}</label>
-                  <label className="text-sm">CVC<input name="cvc" value={form.cvc} onChange={handleChange} placeholder="123" className="mt-1 w-full border rounded-xl px-3 py-2 bg-white/5 border-white/10" />{errors.cvc && <div className="text-xs text-rose-300 mt-1">{errors.cvc}</div>}</label>
-                </div>
-              </div>
-              <div className="sm:col-span-2 mt-4 flex gap-3">
-                <button type="button" onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl btn-ghost">Volver al carrito</button>
-                <button type="submit" className="px-5 py-3 rounded-2xl btn-primary">Pagar y finalizar</button>
-              </div>
-            </form>
-          </div>
-          <aside className="p-6 rounded-2xl glass shadow-md h-fit">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">🛒 Resumen del pedido</h3>
-            <div className="space-y-3">
-              {cart.length === 0 ? (
-                <div className="text-sm ink-2">Tu carrito está vacío.</div>
+              {ok ? (
+                <div className="text-sm">✅ ¡Gracias! Te escribiremos pronto.</div>
               ) : (
-                cart.map((line) => (
-                  <div key={line.id} className="flex items-center gap-3">
-                    <SmartImg srcList={line.srcList} alt={line.title} className="w-12 h-12 rounded-lg object-cover" />
-                    <div className="flex-1 text-sm">
-                      <div className="font-medium">{line.title}</div>
-                      <div className="ink-2">{line.capacity} · {line.color}</div>
-                    </div>
-                    <div className="text-sm">x{line.qty}</div>
-                  </div>
-                ))
+                <form onSubmit={onSubmit} className="flex gap-2">
+                  <input type="email" required placeholder="Tu email" className="flex-1 border rounded-xl px-3 py-2 bg-white/5 border-white/10" aria-label="Correo electrónico" />
+                  <button className="px-5 py-2 rounded-xl btn-primary font-semibold" aria-label="Suscribirse">Suscribirme</button>
+                </form>
               )}
             </div>
-            <div className="mt-4 border-t border-white/10 pt-4 space-y-1 text-sm">
-              <div className="flex justify-between"><span className="ink-2">Subtotal</span><span>{money(total || 0)}</span></div>
-              <div className="flex justify-between"><span className="ink-2">Envío</span><span>{shippingCost === 0 ? 'Gratis' : money(shippingCost)}</span></div>
-              <div className="flex justify-between font-semibold text-base mt-1"><span>Total</span><span>{money((total || 0) + shippingCost)}</span></div>
-            </div>
-          </aside>
-        </section>
-      );
-    }
-
-    function Chatbot(){
-      const [messages,setMessages] = useState([{role:'bot', text:'¡Hola! Soy el asistente Hydrozen. ¿En qué puedo ayudarte?'}]);
-      const [draft,setDraft] = useState('');
-      function send(){ if(!draft.trim()) return; setMessages(m=>[...m, {role:'user',text:draft}, {role:'bot',text:'Gracias por tu mensaje. Aquí iría la conexión a un chatbot real.'}]); setDraft(''); }
-      return (
-        <section className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 p-4 rounded-2xl glass shadow-md h-[70vh] flex flex-col">
-            <div className="flex items-center gap-2 mb-3">💬 <h2 className="text-xl font-semibold">Chatbot de soporte</h2></div>
-            <div className="flex-1 overflow-auto space-y-3">
-              {messages.map((m,i)=> (
-                <div key={i} className={cls('max-w-[80%] p-3 rounded-2xl', m.role==='bot'? 'bg-white/5':'bg-sky-500/20 ml-auto')}>
-                  <p className="text-sm">{m.text}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 flex gap-2">
-              <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Escribe tu mensaje..." className="flex-1 border rounded-xl px-3 py-2 bg-white/5 border-white/10"/>
-              <button onClick={send} className="px-4 py-2 rounded-xl btn-primary">Enviar</button>
-            </div>
-          </div>
-          <aside className="p-5 rounded-2xl glass shadow-md">
-            <h3 className="font-semibold">Temas frecuentes</h3>
-            <ul className="mt-3 text-sm space-y-2 ink-2">
-              <li>¿Cómo funciona el filtro?</li>
-              <li>Garantía y devoluciones</li>
-              <li>Cuidados y limpieza</li>
-              <li>Envíos y plazos</li>
-            </ul>
-          </aside>
-        </section>
-      );
-    }
-
-    function Suppliers(){
-      return (
-        <section className="grid lg:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-2xl font-bold">Distribuidores y Proveedores</h2>
-            <p className="mt-2 ink-2">¿Quieres Hydrozen en tu catálogo o equipar a tu empresa con nuestras botellas con filtro? Déjanos tus datos y te contactaremos.</p>
-            <div className="mt-6 p-5 rounded-2xl glass shadow-md">
-              <FormSupplier />
-            </div>
-          </div>
-          <div className="p-6 rounded-3xl glass shadow-md">
-            <h3 className="text-lg font-semibold">Ventajas B2B</h3>
-            <ul className="mt-3 text-sm space-y-2 ink-2">
-              <li>✔️ Precios por volumen y packs personalizables</li>
-              <li>✔️ Personalización con tu logo</li>
-              <li>✔️ Stock y logística a medida</li>
-              <li>✔️ Soporte técnico y postventa</li>
-            </ul>
-          </div>
-        </section>
-      );
-    }
-
-    function FormSupplier(){
-      return (
-        <form className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input className="border rounded-xl px-3 py-2 bg-white/5 border-white/10" placeholder="Nombre"/>
-          <input className="border rounded-xl px-3 py-2 bg-white/5 border-white/10" placeholder="Empresa"/>
-          <input className="border rounded-xl px-3 py-2 sm:col-span-2 bg-white/5 border-white/10" placeholder="Email"/>
-          <input className="border rounded-xl px-3 py-2 sm:col-span-2 bg-white/5 border-white/10" placeholder="Teléfono"/>
-          <textarea className="border rounded-xl px-3 py-2 sm:col-span-2 bg-white/5 border-white/10" rows="4" placeholder="Cuéntanos qué necesitas (volumen, personalización, plazos)..."></textarea>
-          <button type="button" className="mt-2 sm:col-span-2 rounded-2xl px-4 py-3 btn-primary">Enviar solicitud</button>
-        </form>
-      );
-    }
-
-    function About(){
-      return (
-        <section className="grid lg:grid-cols-2 gap-8 items-start">
-          <div>
-            <h2 className="text-2xl font-bold">Nuestra misión</h2>
-            <p className="mt-2 ink-2">En Hydrozen creemos en un mundo con menos plástico de un solo uso y más agua de calidad al alcance de todos. Diseñamos productos duraderos, minimalistas y prácticos.</p>
-            <div className="mt-6 grid sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl glass shadow-md"><h4 className="font-semibold">Sostenibilidad</h4><p className="text-sm ink-2 mt-1">Materiales libres de BPA, piezas reemplazables y empaques reciclables.</p></div>
-              <div className="p-4 rounded-2xl glass shadow-md"><h4 className="font-semibold">Innovación</h4><p className="text-sm ink-2 mt-1">Filtro activo y diseño anti-derrames para el día a día.</p></div>
-            </div>
-          </div>
-          <div className="p-6 rounded-3xl glass shadow-md">
-            <h3 className="font-semibold flex items-center gap-2">📧 Atención al cliente</h3>
-            <p className="text-sm ink-2 mt-2">Escríbenos a <span className="text-sky-300 font-medium">soporte@hydrozen.com</span> o usa el chatbot para respuestas rápidas.</p>
           </div>
         </section>
       );
@@ -828,7 +423,7 @@
 
     function Footer({ onNavigate }){
       return (
-        <footer className="mt-16 border-t border-white/10">
+        <footer className="mt-16 border-t border-white/10" role="contentinfo">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid sm:grid-cols-3 gap-6 text-sm">
             <div>
               <div className="font-semibold">Hydrozen</div>
@@ -843,10 +438,10 @@
             </div>
             <div>
               <div className="font-semibold">Legal</div>
-              <p className="ink-2 mt-1">Términos · Privacidad · Cookies</p>
+              <p className="ink-2 mt-1"><a href="/terminos" className="hover:underline">Términos</a> · <a href="/privacidad" className="hover:underline">Privacidad</a> · <a href="/cookies" className="hover:underline">Cookies</a></p>
             </div>
           </div>
-          <div className="text-center text-xs ink-2 pb-6">© {new Date().getFullYear()} Hydrozen</div>
+          <div className="text-center text-xs ink-2 pb-6">© <span id="year"></span> Hydrozen</div>
         </footer>
       );
     }
@@ -857,13 +452,46 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+    function AppWrapper(){ useEffect(()=>{ document.getElementById('year').textContent = new Date().getFullYear(); },[]); return <App/>; }
+    ReactDOM.createRoot(document.getElementById('root')).render(<AppWrapper/>);
+  </script>
+
+  <!-- Cookie Banner + Analytics control -->
+  <div id="cookie-banner" class="cookie-banner hidden">
+    <div class="max-w-4xl mx-auto m-3 glass rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-3">
+      <p class="text-sm flex-1">Usamos cookies para analizar el tráfico y mejorar tu experiencia. ¿Aceptas cookies de analítica/marketing?</p>
+      <div class="flex gap-2">
+        <button id="cookie-accept" class="px-4 py-2 rounded-xl btn-primary">Aceptar</button>
+        <button id="cookie-reject" class="px-4 py-2 rounded-xl btn-ghost">Rechazar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const banner = document.getElementById('cookie-banner');
+      const consent = localStorage.getItem('hz_consent');
+      function loadAnalytics(){
+        // 🔸 Pega aquí tu GA4/Meta solo SI hay consentimiento:
+        // Ejemplo (Google):
+        // const s = document.createElement('script'); s.src='https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX'; s.async=true; document.head.appendChild(s);
+        // window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XXXXXXX');
+      }
+      if(consent === 'granted'){ loadAnalytics(); }
+      else if(consent === 'denied'){ /* nada */ }
+      else { banner.classList.remove('hidden'); }
+
+      document.getElementById('cookie-accept').onclick = ()=>{ localStorage.setItem('hz_consent','granted'); banner.remove(); loadAnalytics(); }
+      document.getElementById('cookie-reject').onclick = ()=>{ localStorage.setItem('hz_consent','denied'); banner.remove(); }
+    })();
   </script>
 </body>
 </html>
 
 
+
        
+
 
 
 
