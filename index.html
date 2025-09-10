@@ -3,87 +3,137 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hydrozen – Tienda</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <script>tailwind.config = { darkMode: 'class' };</script>
+  <title>Hydrozen Bottle</title>
+  <!-- Tailwind Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body{font-family:'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;}
     .no-scrollbar::-webkit-scrollbar{ display:none; }
     .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
   </style>
 </head>
-<body class="bg-white text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+<body class="bg-gradient-to-b from-sky-50 to-white text-slate-800">
   <div id="root"></div>
 
-  <!-- React + Babel -->
+  <!-- React + Babel (JSX en el navegador) -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useRef } = React;
+    const { useState, useMemo, useRef, useEffect } = React;
 
-    // Utils
-    const money = (n)=> n.toLocaleString(undefined,{style:'currency', currency:'EUR'});
-    const cls = (...xs)=> xs.filter(Boolean).join(' ');
-    function useLocalStorage(key, initial){
-      const [value,setValue] = useState(()=>{ try{ const v=localStorage.getItem(key); return v? JSON.parse(v): initial; }catch{ return initial; } });
-      useEffect(()=>{ try{ localStorage.setItem(key, JSON.stringify(value)); }catch{} },[key,value]);
-      return [value,setValue];
-    }
-    function SmartImg({ srcList=[], alt='', className='' }){
-      const [idx,setIdx]=useState(0); const [failed,setFailed]=useState(false);
-      useEffect(()=>{ setIdx(0); setFailed(false); }, [JSON.stringify(srcList)]);
-      if(failed || !srcList.length){ return <div className={cls('grid place-items-center bg-slate-100 dark:bg-slate-800 text-slate-400', className)}><span className="text-xs">Imagen no disponible</span></div>; }
+    // ===== Img con Fallbacks =====
+    function SmartImg({ srcList = [], alt = '', className = '' }) {
+      const [idx, setIdx] = useState(0);
+      const [failed, setFailed] = useState(false);
+      useEffect(() => { setIdx(0); setFailed(false); }, [JSON.stringify(srcList)]);
+      if (!srcList || srcList.length === 0 || failed) {
+        return (
+          <div className={'grid place-items-center bg-slate-100 text-slate-400 ' + className}>
+            <span className="text-xs">Imagen no disponible</span>
+          </div>
+        );
+      }
       const src = srcList[idx];
-      return <img src={src} alt={alt} className={className} onError={()=>{ if(idx+1<srcList.length) setIdx(idx+1); else setFailed(true); }} />;
+      return (
+        <img
+          src={src}
+          alt={alt}
+          className={className}
+          onError={() => { if (idx + 1 < srcList.length) setIdx(idx + 1); else setFailed(true); }}
+        />
+      );
     }
 
-    // Data
+    // ===== Datos =====
     const COLORS = [
-      { id:'graphite', name:'Graphite', hex:'#4b5563' },
-      { id:'glacier', name:'Glacier', hex:'#9bd5ff' },
-      { id:'clear', name:'Clear', hex:'#d1d5db' },
-      { id:'sage', name:'Sage', hex:'#a3c4a8' },
+      { id: "graphite", name: "Graphite", hex: "#4b5563" },
+      { id: "glacier", name: "Glacier", hex: "#9bd5ff" },
+      { id: "clear", name: "Clear", hex: "#d1d5db" },
+      { id: "sage", name: "Sage", hex: "#a3c4a8" },
     ];
     const PRODUCT = {
-      id:'hydrozen-bottle',
-      title:'Hydrozen Bottle – Filtro Activo',
-      subtitle:'Hidratación limpia, diseño minimalista',
-      capacities:['450 ml','600 ml','750 ml'],
-      priceByCapacity:{ '450 ml':19.9, '600 ml':24.9, '750 ml':29.9 },
-      compareByCapacity:{ '450 ml':24.9, '600 ml':34.9, '750 ml':39.9 },
-      bullets:[ 'Filtrado de una sola pasada', 'Tapa a prueba de fugas', 'Apta para lavavajillas', 'Libre de BPA' ],
-      images:{ main:'product.jpg', byColor:{ graphite:'product-graphite.jpg', glacier:'product-glacier.jpg', clear:'product-clear.jpg', sage:'product-sage.jpg' } }
+      id: "hydrozen-bottle",
+      title: "Hydrozen Bottle – Filtro Activo",
+      subtitle: "Hidratación limpia, diseño minimalista",
+      price: 24.9,
+      compareAt: 34.9,
+      capacities: ["450 ml","600 ml","750 ml"],
+      bullets: [
+        "Filtrado de una sola pasada para agua más limpia",
+        "A prueba de fugas con apertura rápida",
+        "Apta para lavavajillas (parte superior)",
+        "Libre de BPA. Peso ultraligero",
+      ],
+      images: {
+        main: "product.jpg",
+        byColor: {
+          graphite: "product-graphite.jpg",
+          glacier: "product-glacier.jpg",
+          clear: "product-clear.jpg",
+          sage: "product-sage.jpg",
+        }
+      }
     };
-    const FILTER_PACKS = [
-      { id:'pack1', label:'Pack 1', qty:1, price:7.9, compareAt:9.9 },
-      { id:'pack5', label:'Pack 5', qty:5, price:34.9, compareAt:39.5 },
-      { id:'pack10', label:'Pack 10', qty:10, price:64.9, compareAt:79.0 },
-    ];
+
+    // Catálogo general (incluye NOVEDAD: filtros reemplazables)
     const CATALOG = [
-      { id:'hydrozen-bottle', kind:'bottle', title:'Hydrozen Bottle', subtitle:'Botella con filtro activo', imageList:['product.jpg','product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png'], badge:'Top ventas' },
-      { id:'filter-refill', kind:'filter', title:'Filtros reemplazables', subtitle:'OFERTA por lanzamiento', imageList:['filtros.jpg','filtros.png','filtros.jpeg'], badge:'Oferta' },
+      {
+        id: "hydrozen-bottle",
+        title: "Hydrozen Bottle",
+        subtitle: "Botella con filtro activo",
+        price: 24.9,
+        compareAt: 34.9,
+        srcList: [
+          "product.jpg","product.png","product.jpeg",
+          "imagen botella.png","botella.jpg","botella.png"
+        ],
+        badge: "Top ventas"
+      },
+      {
+        id: "filter-refill",
+        title: "Filtro activo · Repuesto",
+        subtitle: "Cartucho de recambio (hasta 3 meses)",
+        price: 7.9,
+        compareAt: 9.9,
+        srcList: ["filtros.jpg","filtros.png","filtros.jpeg"],
+        badge: "Novedad"
+      },
+      {
+        id: "filter-pack3",
+        title: "Pack 3 filtros · Repuesto",
+        subtitle: "Ahorra con el pack trimestral",
+        price: 19.9,
+        compareAt: 23.7,
+        srcList: ["filtros.jpg","filtros.png","filtros.jpeg"],
+        badge: "Ahorra 15%"
+      }
     ];
 
+    const money = (n)=> n.toLocaleString(undefined,{style:'currency', currency:'EUR'});
+
+    function useLocalStorage(key, initial){
+      const [value,setValue] = useState(()=>{
+        try{ const v = localStorage.getItem(key); return v? JSON.parse(v): initial; }catch{ return initial; }
+      });
+      useEffect(()=>{ localStorage.setItem(key, JSON.stringify(value)); },[key,value]);
+      return [value,setValue];
+    }
+
+    // ===== App =====
     function App(){
       const [route,setRoute] = useState('home');
       const [cart,setCart] = useLocalStorage('hydrozen_cart', []);
       const cartCount = useMemo(()=> cart.reduce((a,i)=>a+i.qty,0),[cart]);
       const cartTotal = useMemo(()=> cart.reduce((a,i)=>a+i.qty*i.price,0),[cart]);
-      // Appearance
-      const [appearance,setAppearance] = useLocalStorage('hydrozen_appearance','light');
-      useEffect(()=>{ const root=document.documentElement; if(appearance==='dark') root.classList.add('dark'); else root.classList.remove('dark'); },[appearance]);
 
       return (
         <div className="min-h-screen">
-          <TopBar onNavigate={setRoute} cartCount={cartCount} appearance={appearance} setAppearance={setAppearance} />
+          <TopBar onNavigate={setRoute} cartCount={cartCount} />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
             {route==='home' && <>
-              <Hero onNavigate={setRoute} />
-              <InteractiveBanner />
-              <HomeHighlight cart={cart} setCart={setCart} />
+              <HeroBanner onNavigate={setRoute} />
+              <ProductShowcase cart={cart} setCart={setCart} />
               <Features />
               <CTA onNavigate={setRoute} />
             </>}
@@ -100,87 +150,58 @@
       );
     }
 
-    function TopBar({ onNavigate, cartCount, appearance, setAppearance }){
-      const [menuOpen,setMenuOpen] = useState(false);
+    // ===== UI =====
+    function TopBar({ onNavigate, cartCount }){
       return (
-        <>
-          <header className="fixed top-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 shadow-sm">
-            <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={()=>onNavigate('home')}>
-                <div className="w-9 h-9 rounded-2xl bg-sky-600 grid place-items-center text-white font-bold">HZ</div>
-                <div>
-                  <div className="text-sm tracking-wide text-slate-500 dark:text-slate-300">Hydrozen</div>
-                  <div className="text-lg font-semibold -mt-1 text-slate-900 dark:text-white">Bottle</div>
-                </div>
-              </div>
-              <nav className="hidden sm:flex items-center gap-6 text-sm">
-                <button className="hover:text-sky-700" onClick={()=>onNavigate('home')}>Inicio</button>
-                <button className="hover:text-sky-700" onClick={()=>onNavigate('products')}>Productos</button>
-                <button className="hover:text-sky-700" onClick={()=>onNavigate('about')}>Nosotros</button>
-                <button className="hover:text-sky-700" onClick={()=>onNavigate('suppliers')}>Proveedores</button>
-                <button className="hover:text-sky-700" onClick={()=>onNavigate('chatbot')}>Chatbot</button>
-              </nav>
-              <div className="hidden sm:flex items-center gap-2 mr-2 text-sm">
-                <span className="text-slate-600 dark:text-slate-300">Tema:</span>
-                <button onClick={()=>setAppearance('light')} className={`px-2 py-1 rounded-lg border ${appearance==='light'?'bg-sky-600 text-white border-sky-600':'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>Claro</button>
-                <button onClick={()=>setAppearance('dark')} className={`px-2 py-1 rounded-lg border ${appearance==='dark'?'bg-sky-600 text-white border-sky-600':'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>Oscuro</button>
-              </div>
-              <button className="sm:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-700" onClick={()=>setMenuOpen(true)} aria-label="Abrir menú">☰</button>
-              <button onClick={()=>onNavigate('cart')} className="relative rounded-2xl bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 flex items-center gap-2 shadow">
-                <span className="text-lg">🛒</span>Carrito
-                {cartCount>0 && <span className="absolute -top-2 -right-2 bg-sky-500 text-white text-xs rounded-full px-2 py-0.5">{cartCount}</span>}
-              </button>
-            </div>
-          </header>
-
-          {menuOpen && (
-            <div className="fixed inset-0 z-50" aria-modal="true" role="dialog">
-              <div className="absolute inset-0 bg-black/40" onClick={()=>setMenuOpen(false)}></div>
-              <div className="absolute left-0 top-0 h-full w-[84%] max-w-sm bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 shadow-xl p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-2xl bg-sky-600 grid place-items-center text-white font-bold">HZ</div>
-                    <div className="text-lg font-semibold">Hydrozen</div>
-                  </div>
-                  <button onClick={()=>setMenuOpen(false)} className="p-2 rounded-lg border border-slate-200 dark:border-slate-700">✕</button>
-                </div>
-                <nav className="mt-6 space-y-2 text-base">
-                  <button onClick={()=>{onNavigate('home'); setMenuOpen(false);}} className="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Inicio</button>
-                  <button onClick={()=>{onNavigate('products'); setMenuOpen(false);}} className="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Productos</button>
-                  <button onClick={()=>{onNavigate('about'); setMenuOpen(false);}} className="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Nosotros</button>
-                  <button onClick={()=>{onNavigate('suppliers'); setMenuOpen(false);}} className="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Proveedores</button>
-                  <button onClick={()=>{onNavigate('chatbot'); setMenuOpen(false);}} className="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Chatbot</button>
-                </nav>
-                <div className="mt-6 border-t border-slate-200 dark:border-slate-700 pt-4">
-                  <div className="text-sm text-slate-600 dark:text-slate-300 mb-2">Apariencia</div>
-                  <div className="flex gap-2">
-                    <button onClick={()=>setAppearance('light')} className={`px-3 py-1.5 rounded-lg border ${appearance==='light'?'bg-sky-600 text-white border-sky-600':'border-slate-300 dark:border-slate-600'}`}>Claro</button>
-                    <button onClick={()=>setAppearance('dark')} className={`px-3 py-1.5 rounded-lg border ${appearance==='dark'?'bg-sky-600 text-white border-sky-600':'border-slate-300 dark:border-slate-600'}`}>Oscuro</button>
-                  </div>
-                </div>
+        <header className="fixed top-0 left-0 right-0 z-40 backdrop-blur bg-white/80 border-b border-slate-100 shadow-sm">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={()=>onNavigate('home')}>
+              <div className="w-9 h-9 rounded-2xl bg-sky-500 grid place-items-center shadow-sm text-white font-bold">HZ</div>
+              <div>
+                <div className="text-sm tracking-wide text-slate-500">Hydrozen</div>
+                <div className="text-lg font-semibold -mt-1">Bottle</div>
               </div>
             </div>
-          )}
-        </>
+            <nav className="hidden sm:flex items-center gap-6 text-sm">
+              <button className="hover:text-sky-700" onClick={()=>onNavigate('home')}>Inicio</button>
+              <button className="hover:text-sky-700" onClick={()=>onNavigate('products')}>Productos</button>
+              <button className="hover:text-sky-700" onClick={()=>onNavigate('about')}>Nosotros</button>
+              <button className="hover:text-sky-700" onClick={()=>onNavigate('suppliers')}>Proveedores</button>
+              <button className="hover:text-sky-700" onClick={()=>onNavigate('chatbot')}>Chatbot</button>
+            </nav>
+            <button onClick={()=>onNavigate('cart')} className="relative rounded-2xl bg-slate-900 text-white px-4 py-2 flex items-center gap-2 shadow hover:shadow-md">
+              <span className="text-lg">🛒</span>Carrito
+              {cartCount>0 && <span className="absolute -top-2 -right-2 bg-sky-500 text-white text-xs rounded-full px-2 py-0.5">{cartCount}</span>}
+            </button>
+          </div>
+        </header>
       );
     }
 
-    function Hero({ onNavigate }){
+    function HeroBanner({ onNavigate }){
+      const videoRef = useRef(null);
+      const [playing,setPlaying] = useState(true);
+      const [muted,setMuted] = useState(true);
+      const togglePlay = ()=>{ const v=videoRef.current; if(!v) return; if(v.paused){v.play();setPlaying(true);} else {v.pause();setPlaying(false);} };
+      const toggleMute = ()=>{ const v=videoRef.current; if(!v) return; v.muted=!v.muted; setMuted(v.muted); };
       return (
-        <section className="mb-10">
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-            <div className="grid md:grid-cols-2">
-              <div className="p-8 sm:p-12">
-                <div className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100">💧 Filtrado activo · Libre de BPA</div>
-                <h1 className="mt-4 text-4xl sm:text-5xl font-bold leading-tight">Agua más limpia,<br/> diseño minimalista</h1>
-                <p className="mt-3 text-slate-600 dark:text-slate-400">Hydrozen Bottle con filtro reemplazable y tapa anti-fugas. Pensada para el día a día.</p>
+        <section className="relative">
+          <div className="relative h-[72vh] sm:h-[78vh] overflow-hidden rounded-b-[2rem]">
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none" src="hero.mp4" autoPlay muted={muted} loop playsInline></video>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/50 pointer-events-none"></div>
+            <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+              <div className="text-white max-w-2xl">
+                <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1.5 rounded-full text-xs sm:text-sm">💧 Filtrado activo · Libre de BPA</div>
+                <h1 className="mt-4 text-4xl sm:text-6xl font-bold leading-[1.05]">Agua más limpia, <span className="text-sky-300">en cualquier lugar</span></h1>
+                <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-200">Presentamos <b>Hydrozen Bottle</b>: tapa a prueba de fugas, filtro integrado y diseño minimalista.</p>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold">Ver productos</button>
-                  <button onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700">Comprar ahora</button>
+                  <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl bg-sky-500 text-white font-semibold shadow hover:shadow-md">Ver productos</button>
+                  <button onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl bg-white/10 text-white border border-white/20 hover:bg-white/15">Comprar ahora</button>
                 </div>
               </div>
-              <div className="p-4">
-                <SmartImg srcList={[ 'hero.jpg','product.jpg','product.png','imagen botella.png','botella.jpg' ]} alt="Hydrozen" className="w-full h-[360px] md:h-full object-cover rounded-2xl" />
+              <div className="absolute right-4 bottom-4 flex items-center gap-2 z-20">
+                <button onClick={togglePlay} className="rounded-full p-2 bg-white/90 text-slate-900 hover:bg-white">{playing? '⏸':'▶️'}</button>
+                <button onClick={toggleMute} className="rounded-full p-2 bg-white/90 text-slate-900 hover:bg-white">{muted? '🔇':'🔊'}</button>
               </div>
             </div>
           </div>
@@ -188,58 +209,36 @@
       );
     }
 
-    function InteractiveBanner(){
-      const videoRef = React.useRef(null);
-      const [playing,setPlaying] = React.useState(true);
-      const [muted,setMuted] = React.useState(true);
-      const togglePlay = () => { const v = videoRef.current; if(!v) return; if(v.paused){ v.play(); setPlaying(true);} else { v.pause(); setPlaying(false);} };
-      const toggleMute = () => { const v = videoRef.current; if(!v) return; v.muted = !v.muted; setMuted(v.muted); };
-      return (
-        <section className="mb-10">
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
-            <div className="relative w-full h-64 sm:h-80 md:h-[420px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-              {/* Fondo placeholder si el video no carga */}
-              <div className="absolute inset-0 bg-slate-100 dark:bg-slate-800 grid place-items-center">
-                <div className="text-sm text-slate-500 dark:text-slate-400">Coloca tu vídeo como <code>hero.mp4</code></div>
-              </div>
-              <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" src="hero.mp4" playsInline loop muted={muted} autoPlay />
-              <div className="absolute left-3 top-3 text-xs px-2 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700">Banner interactivo</div>
-              <div className="absolute right-3 bottom-3 flex gap-2">
-                <button onClick={togglePlay} className="rounded-full p-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700">{playing ? '⏸' : '▶️'}</button>
-                <button onClick={toggleMute} className="rounded-full p-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700">{muted ? '🔇' : '🔊'}</button>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
-
-    function HomeHighlight({ cart, setCart }){
+    function ProductShowcase({ cart, setCart }){
       const [color,setColor] = useState(COLORS[0]);
       const [capacity,setCapacity] = useState(PRODUCT.capacities[1]);
       const [qty,setQty] = useState(1);
-      const price = PRODUCT.priceByCapacity[capacity];
-      function add(){
-        const srcList=[ PRODUCT.images.byColor[color.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ].filter(Boolean);
-        const line={ id:`${PRODUCT.id}-${color.id}-${capacity}`, title:PRODUCT.title, color:color.name, capacity, price, qty, srcList };
-        setCart(prev=>{ const i=prev.findIndex(p=>p.id===line.id); if(i>=0){ const cp=[...prev]; cp[i]={...cp[i], qty: cp[i].qty + qty}; return cp; } return [...prev, line]; });
+      function addToCart(){
+        const srcList = [
+          PRODUCT.images.byColor[color.id], PRODUCT.images.main,
+          'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png'
+        ].filter(Boolean);
+        const line = { id: `${PRODUCT.id}-${color.id}-${capacity}`, title: PRODUCT.title, color: color.name, capacity, price: PRODUCT.price, qty, srcList };
+        setCart(prev=>{
+          const i = prev.findIndex(p=>p.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + qty }; return cp; }
+          return [...prev,line];
+        });
+      });
       }
       return (
-        <section className="mb-12 grid lg:grid-cols-2 gap-8 items-center">
-          <div>
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
-              <SmartImg srcList={[ PRODUCT.images.byColor[color.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ]} alt={`Hydrozen ${color.name}`} className="w-full h-[360px] object-cover rounded-xl" />
-            </div>
+        <section id="producto" className="py-12 grid lg:grid-cols-2 gap-10 items-center">
+          <div className="order-2 lg:order-1">
+            <VariantCarousel color={color} setColor={setColor} />
           </div>
-          <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-            <h2 className="text-3xl font-bold">{PRODUCT.title}</h2>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">{PRODUCT.subtitle}</p>
-            <div className="mt-5">
+          <div className="order-1 lg:order-2">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{PRODUCT.title}</h2>
+            <p className="mt-3 text-slate-600">{PRODUCT.subtitle}</p>
+            <div className="mt-6">
               <div className="text-sm font-medium">🎨 Color</div>
               <div className="mt-2 flex flex-wrap gap-2">
-                {COLORS.map(c=>(
-                  <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items-center gap-2', color.id===c.id?'ring-2 ring-sky-500 border-sky-300':'border-slate-200 dark:border-slate-700')}>
-                    <span className="w-4 h-4 rounded-full" style={{background:c.hex}}></span>{c.name}
+                {COLORS.map(c=> (
+                  <button key={c.id} onClick={()=>setColor(c)} className={`px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm ${color.id===c.id? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200'}`}>
+                    <span className="w-4 h-4 rounded-full" style={{background:c.hex}}></span> {c.name}
                   </button>
                 ))}
               </div>
@@ -247,209 +246,127 @@
             <div className="mt-4">
               <div className="text-sm font-medium">📦 Capacidad</div>
               <div className="mt-2 flex flex-wrap gap-2">
-                {PRODUCT.capacities.map(cap=>(
-                  <button key={cap} onClick={()=>setCapacity(cap)} className={cls('px-3 py-2 rounded-xl border', capacity===cap?'ring-2 ring-sky-500 border-sky-300':'border-slate-200 dark:border-slate-700')}>{cap}</button>
+                {PRODUCT.capacities.map(cap=> (
+                  <button key={cap} onClick={()=>setCapacity(cap)} className={`px-3 py-2 rounded-xl border shadow-sm ${capacity===cap? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200'}`}>{cap}</button>
                 ))}
               </div>
             </div>
             <div className="mt-4 flex items-center gap-3">
-              <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl">
+              <div className="flex items-center border rounded-xl shadow-sm">
                 <button className="px-3 py-2" onClick={()=>setQty(q=>Math.max(1,q-1))}>−</button>
                 <div className="px-4 py-2 min-w-10 text-center font-medium">{qty}</div>
                 <button className="px-3 py-2" onClick={()=>setQty(q=>q+1)}>＋</button>
               </div>
-              <button onClick={add} className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold">Añadir al carrito</button>
-              <div className="text-xl font-semibold">{money(price)}</div>
+              <button onClick={addToCart} className="px-5 py-3 rounded-2xl bg-sky-600 text-white font-semibold shadow hover:shadow-md">Añadir al carrito</button>
             </div>
-            <ul className="mt-5 grid sm:grid-cols-2 gap-2 text-sm text-slate-700 dark:text-slate-300">
-              {PRODUCT.bullets.map(b=>(<li key={b}>✔️ {b}</li>))}
-            </ul>
+            <div className="mt-4 flex items-end gap-3">
+              <div className="text-2xl font-semibold">{money(PRODUCT.price)}</div>
+              <div className="text-slate-400 line-through">{money(PRODUCT.compareAt)}</div>
+              <span className="text-xs bg-emerald-100 text-emerald-700 rounded-full px-2 py-1">Ahorra {money(PRODUCT.compareAt-PRODUCT.price)}</span>
+            </div>
+            <div className="mt-6 grid sm:grid-cols-2 gap-3">
+              {PRODUCT.bullets.map(b=> (
+                <div key={b} className="flex items-start gap-2">✅<p className="text-sm text-slate-700">{b}</p></div>
+              ))}
+            </div>
           </div>
         </section>
       );
     }
 
-    function Catalog({ onNavigate, cart, setCart }){
-      const [modal,setModal] = useState(null);
+    function VariantCarousel({ color, setColor }){
+      const scrollerRef = useRef(null);
+      const snapTo = (i)=>{ const el=scrollerRef.current; if(!el||!el.children[i]) return; el.children[i].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); setColor(COLORS[i]); };
+      useEffect(()=>{ const i = COLORS.findIndex(c=>c.id===color.id); if(i>=0) snapTo(i); },[color]);
       return (
-        <section className="py-6">
-          <div className="flex items-end justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-2xl font-bold">Nuestros productos</h2>
-              <p className="text-slate-600 dark:text-slate-400">Hydrozen Bottle + filtros (en oferta)</p>
-            </div>
-            <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white">Ver carrito</button>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {CATALOG.map(p=>(
-              <article key={p.id} className="group rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition hover:-translate-y-0.5 hover:shadow-lg">
-                <div className="relative">
-                  <button className="absolute inset-0 z-10" onClick={()=>setModal({ type:p.kind, product:p })} aria-label="Abrir"></button>
-                  <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-56 object-cover" />
-                  {p.badge && (
-                    <span className={cls('absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full', p.badge==='Oferta' ? 'bg-rose-100 text-rose-700' : 'bg-sky-100 text-sky-700')}>{p.badge}</span>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold">{p.title}</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{p.subtitle}</p>
-                  {p.kind==='filter' && (
-                    <div className="mt-2 text-xs inline-flex items-center gap-1 bg-rose-50 text-rose-700 px-2 py-1 rounded-full">🔥 En oferta</div>
-                  )}
-                  <div className="mt-4 flex gap-2">
-                    <button onClick={()=>setModal({ type:p.kind, product:p })} className="flex-1 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white">Ver opciones</button>
-                    <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700">Carrito</button>
+        <div className="relative">
+          <div className="rounded-[2rem] border bg-white shadow-sm p-3">
+            <div ref={scrollerRef} className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
+              {COLORS.map((c,i)=> (
+                <div key={c.id} className="shrink-0 w-[85%] sm:w-[70%] md:w-[60%] lg:w-[480px] snap-center">
+                  <div className={`relative rounded-2xl overflow-hidden border ${color.id===c.id? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200'}`}>
+                    <SmartImg srcList={[PRODUCT.images.byColor[c.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png'].filter(Boolean)} alt={`Hydrozen ${c.name}`} className="w-full h-[360px] object-cover" />
+                    <div className="absolute left-3 top-3 bg-white/85 rounded-xl px-3 py-1 text-xs flex items-center gap-2 shadow">
+                      <span className="w-3 h-3 rounded-full" style={{background:c.hex}}></span> {c.name}
+                    </div>
                   </div>
                 </div>
-              </article>
-            ))}
+              ))}
+            </div>
           </div>
-
-          {modal?.type==='filter' && (
-            <FilterModal product={modal.product} onClose={()=>setModal(null)} onAdd={(pack)=>{
-              const line={ id:`filter-${pack.id}`, title:`Filtro activo · ${pack.label}`, color:'—', capacity:pack.label, price:pack.price, qty:1, srcList: modal.product.imageList };
-              setCart(prev=>{ const i=prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i]={...cp[i], qty: cp[i].qty+1}; return cp; } return [...prev, line]; });
-              setModal(null);
-            }} />
-          )}
-
-          {modal?.type==='bottle' && (
-            <BottleModal onClose={()=>setModal(null)} onAdd={({color,capacity,qty,price,srcList})=>{
-              const line={ id:`${PRODUCT.id}-${color.id}-${capacity}`, title:PRODUCT.title, color:color.name, capacity, price, qty, srcList };
-              setCart(prev=>{ const i=prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i]={...cp[i], qty: cp[i].qty + qty}; return cp; } return [...prev, line]; });
-              setModal(null);
-            }} />
-          )}
-        </section>
-      );
-    }
-
-    function ModalShell({ children, onClose }){
-      useEffect(()=>{ const h=(e)=>{ if(e.key==='Escape') onClose(); }; document.addEventListener('keydown', h); return ()=>document.removeEventListener('keydown', h); },[onClose]);
-      return (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={onClose}></div>
-          <div className="absolute left-1/2 top-14 -translate-x-1/2 w-[min(96vw,900px)]">
-            {children}
+          <div className="mt-3 flex items-center justify-center gap-2">
+            {COLORS.map((c,i)=> (
+              <button key={c.id} onClick={()=>snapTo(i)} className={`h-2.5 rounded-full transition-all ${c.id===color.id? 'w-6 bg-sky-600':'w-2.5 bg-slate-300'}`}></button>
+            ))}
           </div>
         </div>
       );
     }
 
-    function FilterModal({ product, onClose, onAdd }){
-      const [sel,setSel] = useState(FILTER_PACKS[0]);
-      const saving = Math.round((1 - (sel.price/sel.compareAt)) * 100);
+    // ===== NUEVA SUBPÁGINA: Catálogo =====
+    function Catalog({ onNavigate, cart, setCart }){
+      function addProduct(p){
+        const line = {
+          id: p.id,
+          title: p.title,
+          color: p.id.startsWith('filter')? '—' : 'Graphite',
+          capacity: p.id.startsWith('filter-pack3')? 'Pack 3' : (p.id.startsWith('filter')? 'Repuesto' : '600 ml'),
+          price: p.price,
+          qty: 1,
+          srcList: p.srcList
+        };
+        setCart(prev=>{ const i = prev.findIndex(x=>x.id===line.id); if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + 1 }; return cp;} return [...prev, line]; });
+      }
       return (
-        <ModalShell onClose={onClose}>
-          <div className="rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-            <div className="grid md:grid-cols-2">
-              <SmartImg srcList={product.imageList} alt="Filtros" className="w-full h-72 md:h-full object-cover" />
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Filtros reemplazables</h3>
-                  <button onClick={onClose} className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">✕</button>
-                </div>
-                <p className="text-slate-600 dark:text-slate-400 mt-1">Elige tu pack en <span className="font-medium text-rose-600">oferta</span>. Ahorro hasta <b>{saving}%</b>.</p>
-                <div className="mt-4 grid sm:grid-cols-3 gap-3">
-                  {FILTER_PACKS.map(p=>(
-                    <button key={p.id} onClick={()=>setSel(p)} className={cls('text-left border rounded-xl p-3', sel.id===p.id ? 'ring-2 ring-rose-400 border-rose-300' : 'border-slate-200 dark:border-slate-700')}>
-                      <div className="text-sm font-semibold">{p.label}</div>
-                      <div className="text-xs text-slate-500">{p.qty} cartucho{p.qty>1?'s':''}</div>
-                      <div className="mt-1 flex items-baseline gap-2">
-                        <span className="font-semibold">{money(p.price)}</span>
-                        <span className="text-[12px] text-slate-400 line-through">{money(p.compareAt)}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-5 flex gap-3">
-                  <button onClick={()=>onAdd(sel)} className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold">Añadir {sel.label}</button>
-                  <button onClick={onClose} className="px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700">Cancelar</button>
-                </div>
-              </div>
+        <section className="py-6">
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">Nuestros productos</h2>
+              <p className="text-slate-600">Descubre la botella Hydrozen y los <span className="font-medium text-emerald-700">nuevos filtros reemplazables</span> y el <span className="font-medium text-emerald-700">Pack 3 filtros</span>.</p>
             </div>
+            <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-2xl bg-slate-900 text-white">Ver carrito</button>
           </div>
-        </ModalShell>
-      );
-    }
 
-    function BottleModal({ onClose, onAdd }){
-      const [color,setColor] = useState(COLORS[0]);
-      const [capacity,setCapacity] = useState(PRODUCT.capacities[1]);
-      const [qty,setQty] = useState(1);
-      const price = PRODUCT.priceByCapacity[capacity];
-      const compare = PRODUCT.compareByCapacity[capacity];
-      const srcList = [ PRODUCT.images.byColor[color.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ].filter(Boolean);
-      return (
-        <ModalShell onClose={onClose}>
-          <div className="rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="p-4 md:p-6">
-                <div className="flex gap-3 overflow-x-auto no-scrollbar">
-                  {COLORS.map(c=> (
-                    <div key={c.id} className={cls('shrink-0 w-60 rounded-xl overflow-hidden border', color.id===c.id?'ring-2 ring-sky-500 border-sky-300':'border-slate-200 dark:border-slate-700')}>
-                      <SmartImg srcList={[ PRODUCT.images.byColor[c.id], PRODUCT.images.main, 'product.png','product.jpeg','imagen botella.png','botella.jpg','botella.png' ]} alt={`Hydrozen ${c.name}`} className="w-full h-56 object-cover" />
-                      <div className="p-2 text-sm flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{background:c.hex}}></span>{c.name}</div>
-                    </div>
-                  ))}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {CATALOG.map(p=> (
+              <article key={p.id} className="group rounded-2xl border bg-white shadow-sm overflow-hidden flex flex-col">
+                <div className="relative">
+                  <SmartImg srcList={p.srcList} alt={p.title} className="w-full h-56 object-cover group-hover:scale-[1.02] transition" />
+                  {p.badge && (
+                    <span className={`absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full ${p.badge.includes('Novedad')? 'bg-emerald-100 text-emerald-700':'bg-sky-100 text-sky-700'}`}>{p.badge}</span>
+                  )}
                 </div>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Hydrozen Bottle</h3>
-                  <button onClick={onClose} className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">✕</button>
-                </div>
-                <p className="text-slate-600 dark:text-slate-400 mt-1">Elige color y capacidad.</p>
-                <div className="mt-4">
-                  <div className="text-sm font-medium">🎨 Color</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {COLORS.map(c=> (
-                      <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items-center gap-2', color.id===c.id?'ring-2 ring-sky-500 border-sky-300':'border-slate-200 dark:border-slate-700')}>
-                        <span className="w-4 h-4 rounded-full" style={{background:c.hex}}></span>{c.name}
-                      </button>
-                    ))}
+                <div className="p-4 flex-1 flex flex-col">
+                  <h3 className="font-semibold leading-tight">{p.title}</h3>
+                  <p className="text-sm text-slate-600 mt-1 flex-1">{p.subtitle}</p>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <div className="text-lg font-semibold">{money(p.price)}</div>
+                    {p.compareAt && <div className="text-slate-400 line-through text-sm">{money(p.compareAt)}</div>}
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <button onClick={()=>addProduct(p)} className="flex-1 px-4 py-2 rounded-xl bg-sky-600 text-white">Añadir</button>
+                    <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl border">Carrito</button>
                   </div>
                 </div>
-                <div className="mt-4">
-                  <div className="text-sm font-medium">📦 Capacidad</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {PRODUCT.capacities.map(cap=> (
-                      <button key={cap} onClick={()=>setCapacity(cap)} className={cls('px-3 py-2 rounded-xl border', capacity===cap?'ring-2 ring-sky-500 border-sky-300':'border-slate-200 dark:border-slate-700')}>{cap}</button>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-4 flex items-end gap-3">
-                  <div className="text-2xl font-semibold">{money(price)}</div>
-                  <div className="text-slate-400 line-through">{money(compare)}</div>
-                  <span className="text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full px-2 py-1">Ahorra {money(compare-price)}</span>
-                </div>
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl">
-                    <button className="px-3 py-2" onClick={()=>setQty(q=>Math.max(1,q-1))}>−</button>
-                    <div className="px-4 py-2 min-w-10 text-center font-medium">{qty}</div>
-                    <button className="px-3 py-2" onClick={()=>setQty(q=>q+1)}>＋</button>
-                  </div>
-                  <button onClick={()=>onAdd({color,capacity,qty,price,srcList})} className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-semibold">Añadir al carrito</button>
-                </div>
-              </div>
-            </div>
+              </article>
+            ))}
           </div>
-        </ModalShell>
+        </section>
       );
     }
 
     function Features(){
-      const items=[
-        { t:'Filtrado de una pasada', d:'Agua más limpia sin esfuerzo, con repuestos asequibles.' },
-        { t:'Cero fugas', d:'Tapa de apertura rápida con cierre seguro.' },
-        { t:'Libre de BPA', d:'Fabricada en Tritan™ y apta para lavavajillas.' },
+      const items = [
+        { t: "Filtrado de una pasada", d: "Agua más limpia sin esfuerzo, con repuestos asequibles." },
+        { t: "Cero fugas", d: "Tapa de apertura rápida con cierre seguro para llevar en la mochila." },
+        { t: "Libre de BPA", d: "Fabricada en Tritan™ y apta para lavavajillas." },
       ];
       return (
-        <section className="py-12 grid sm:grid-cols-3 gap-6">
-          {items.map(it=>(
-            <div key={it.t} className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <section id="caracteristicas" className="py-12 grid sm:grid-cols-3 gap-6">
+          {items.map(it=> (
+            <div key={it.t} className="p-6 rounded-2xl border bg-white shadow-sm">
               <h3 className="font-semibold">{it.t}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{it.d}</p>
+              <p className="text-sm text-slate-600 mt-2">{it.d}</p>
             </div>
           ))}
         </section>
@@ -458,16 +375,16 @@
 
     function CTA({ onNavigate }){
       return (
-        <section className="py-16">
-          <div className="rounded-2xl p-10 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <section id="comprar" className="py-16">
+          <div className="rounded-[2rem] p-10 bg-gradient-to-br from-sky-100 via-emerald-50 to-white border">
             <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
               <div>
                 <h3 className="text-2xl font-bold">Listo para dar el salto a un agua mejor</h3>
-                <p className="text-slate-700 dark:text-slate-300 mt-1">Envío 24/48h · Devoluciones 30 días · Pago seguro</p>
+                <p className="text-slate-700 mt-1">Envío 24/48h · Devoluciones 30 días · Pago seguro</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={()=>onNavigate('products')} className="px-6 py-3 rounded-2xl border border-slate-200 dark:border-slate-700">Ver productos</button>
-                <button onClick={()=>onNavigate('cart')} className="px-6 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white">Comprar Hydrozen</button>
+                <button onClick={()=>onNavigate('products')} className="px-6 py-3 rounded-2xl bg-slate-100">Ver productos</button>
+                <button onClick={()=>onNavigate('cart')} className="px-6 py-3 rounded-2xl bg-sky-600 text-white font-semibold shadow hover:shadow-md">Comprar Hydrozen</button>
               </div>
             </div>
           </div>
@@ -480,21 +397,21 @@
       function removeItem(id){ setCart(prev=> prev.filter(i=> i.id!==id)); }
       return (
         <section>
-          <h2 className="text-2xl font-bold mb-6">🛒 Tu carrito</h2>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">🛒 Tu carrito</h2>
           {cart.length===0? (
-            <div className="p-8 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300">Tu carrito está vacío. <button className="text-sky-700 dark:text-sky-400 font-medium" onClick={()=>onNavigate('products')}>Ir a productos</button></div>
+            <div className="p-8 rounded-2xl bg-slate-50 border text-slate-700">Tu carrito está vacío. <button className="text-sky-700 font-medium" onClick={()=>onNavigate('products')}>Ir a productos</button></div>
           ):(
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 {cart.map(line=> (
-                  <div key={line.id} className="flex gap-4 items-center p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                    <SmartImg srcList={line.srcList} alt={line.title} className="w-24 h-24 object-cover rounded-xl"/>
+                  <div key={line.id} className="flex gap-4 items-center p-4 rounded-2xl border bg-white shadow-sm">
+                    <SmartImg srcList={line.srcList} className="w-24 h-24 object-cover rounded-xl" alt={line.title} />
                     <div className="flex-1">
                       <div className="font-medium">{line.title}</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">{line.capacity} · {line.color}</div>
-                      <div className="text-sm mt-1">{money(line.price)}</div>
+                      <div className="text-sm text-slate-600">{line.capacity} · {line.color}</div>
+                      <div className="text-sm text-slate-900 mt-1">{money(line.price)}</div>
                     </div>
-                    <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <div className="flex items-center border rounded-xl">
                       <button className="px-3 py-2" onClick={()=>updateQty(line.id,-1)}>−</button>
                       <div className="px-4 py-2 min-w-10 text-center font-medium">{line.qty}</div>
                       <button className="px-3 py-2" onClick={()=>updateQty(line.id,1)}>＋</button>
@@ -503,11 +420,11 @@
                   </div>
                 ))}
               </div>
-              <aside className="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-fit">
+              <aside className="p-5 rounded-2xl bg-slate-900 text-white shadow-lg h-fit">
                 <div className="flex justify-between text-sm mb-2 opacity-90"><span>Subtotal</span><span>{money(total)}</span></div>
                 <div className="flex justify-between text-sm mb-4 opacity-80"><span>Envío</span><span>Se calcula al finalizar</span></div>
                 <div className="flex justify-between text-lg font-semibold mb-5"><span>Total</span><span>{money(total)}</span></div>
-                <button onClick={()=>onNavigate('checkout')} className="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold">Continuar al pago</button>
+                <button onClick={()=>onNavigate('checkout')} className="w-full py-3 rounded-xl bg-sky-500 font-semibold shadow hover:shadow-md">Continuar al pago</button>
                 <p className="text-xs mt-3 opacity-80">Pago seguro · Devoluciones 30 días</p>
               </aside>
             </div>
@@ -517,89 +434,125 @@
     }
 
     function Checkout({ cart, total, onNavigate, setCart }){
-      const [form, setForm] = useState({ name:'', email:'', phone:'', address:'', city:'', province:'', postal:'', country:'', cardNumber:'', cardName:'', exp:'', cvc:'' });
-      const [shipping, setShipping] = useState('standard');
+      const [form, setForm] = useState({
+        name: "", email: "", phone: "",
+        address: "", city: "", province: "", postal: "", country: "",
+        cardNumber: "", cardName: "", exp: "", cvc: "",
+      });
+      const [shipping, setShipping] = useState("standard");
       const [placed, setPlaced] = useState(false);
       const [errors, setErrors] = useState({});
-      const shippingCost = shipping==='express' ? 4.9 : 0;
-      const orderTotal = (total||0)+shippingCost;
-      const handleChange = (e)=> setForm(f=> ({...f, [e.target.name]: e.target.value}));
-      function validate(){ const errs={}; if(!form.name.trim()) errs.name='Requerido'; if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) errs.email='Email no válido'; if(!form.address.trim()) errs.address='Requerido'; if(!form.city.trim()) errs.city='Requerido'; if(!form.postal.trim()) errs.postal='Requerido'; if(!form.country.trim()) errs.country='Requerido'; if(!form.cardNumber || form.cardNumber.replace(/\s/g,'').length<12) errs.cardNumber='Número inválido'; if(!form.cardName.trim()) errs.cardName='Requerido'; if(!form.exp.trim()) errs.exp='MM/AA'; if(!form.cvc || form.cvc.length<3) errs.cvc='CVC inválido'; setErrors(errs); return Object.keys(errs).length===0; }
-      function placeOrder(e){ e.preventDefault(); if(!validate()) return; setPlaced(true); setCart([]); }
-      if(placed){ return (
-        <section className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-center">
-          <div className="text-3xl mb-2">✅</div>
-          <h2 className="text-2xl font-bold">¡Pedido confirmado!</h2>
-          <p className="text-slate-700 dark:text-slate-300 mt-2">Te hemos enviado un email con los detalles.</p>
-          <div className="mt-6 flex gap-3 justify-center">
-            <button onClick={()=>onNavigate('home')} className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white">Volver al inicio</button>
-            <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700">Seguir comprando</button>
-          </div>
-        </section> ); }
+
+      const shippingCost = shipping === "express" ? 4.9 : 0;
+      const orderTotal = (total || 0) + shippingCost;
+
+      const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+      function validate(){
+        const errs={};
+        if(!form.name.trim()) errs.name="Requerido";
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) errs.email="Email no válido";
+        if(!form.address.trim()) errs.address="Requerido";
+        if(!form.city.trim()) errs.city="Requerido";
+        if(!form.postal.trim()) errs.postal="Requerido";
+        if(!form.country.trim()) errs.country="Requerido";
+        if(!form.cardNumber || form.cardNumber.replace(/\s/g,"").length<12) errs.cardNumber="Número inválido";
+        if(!form.cardName.trim()) errs.cardName="Requerido";
+        if(!form.exp.trim()) errs.exp="MM/AA";
+        if(!form.cvc || form.cvc.length<3) errs.cvc="CVC inválido";
+        setErrors(errs); return Object.keys(errs).length===0;
+      }
+
+      function placeOrder(e){
+        e.preventDefault();
+        if(!validate()) return;
+        setPlaced(true);
+        setCart([]);
+      }
+
+      if(placed){
+        return (
+          <section className="p-6 rounded-2xl bg-white border shadow-sm text-center">
+            <div className="text-3xl mb-2">✅</div>
+            <h2 className="text-2xl font-bold">¡Pedido confirmado!</h2>
+            <p className="text-slate-700 mt-2">Te hemos enviado un email con los detalles del pedido.</p>
+            <div className="mt-6 flex gap-3 justify-center">
+              <button onClick={()=>onNavigate('home')} className="px-5 py-3 rounded-2xl bg-slate-900 text-white">Volver al inicio</button>
+              <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl bg-slate-100">Seguir comprando</button>
+            </div>
+          </section>
+        );
+      }
+
       return (
         <section className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="lg:col-span-2 p-6 rounded-2xl border bg-white shadow-sm">
             <div className="flex items-center gap-2 mb-4">💳 <h2 className="text-xl font-semibold">Datos para finalizar compra</h2></div>
             <form onSubmit={placeOrder} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="sm:col-span-2 text-sm text-slate-600 dark:text-slate-400">Tus datos están protegidos. Este es un ejemplo sin procesamiento real de pagos.</div>
-              <label className="text-sm">Nombre completo<input name="name" value={form.name} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.name && <div className="text-xs text-red-600 mt-1">{errors.name}</div>}</label>
-              <label className="text-sm">Email<input name="email" value={form.email} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.email && <div className="text-xs text-red-600 mt-1">{errors.email}</div>}</label>
-              <label className="text-sm">Teléfono<input name="phone" value={form.phone} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" /></label>
-              <label className="text-sm sm:col-span-2">Dirección<input name="address" value={form.address} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.address && <div className="text-xs text-red-600 mt-1">{errors.address}</div>}</label>
-              <label className="text-sm">Ciudad<input name="city" value={form.city} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.city && <div className="text-xs text-red-600 mt-1">{errors.city}</div>}</label>
-              <label className="text-sm">Provincia<input name="province" value={form.province} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" /></label>
-              <label className="text-sm">Código postal<input name="postal" value={form.postal} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.postal && <div className="text-xs text-red-600 mt-1">{errors.postal}</div>}</label>
-              <label className="text-sm">País<input name="country" value={form.country} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.country && <div className="text-xs text-red-600 mt-1">{errors.country}</div>}</label>
+              <div className="sm:col-span-2 text-sm text-slate-600">Tus datos están protegidos. Este es un ejemplo sin procesamiento real de pagos.</div>
+
+              <label className="text-sm">Nombre completo<input name="name" value={form.name} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.name && <div className="text-xs text-red-600 mt-1">{errors.name}</div>}</label>
+              <label className="text-sm">Email<input name="email" value={form.email} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.email && <div className="text-xs text-red-600 mt-1">{errors.email}</div>}</label>
+              <label className="text-sm">Teléfono<input name="phone" value={form.phone} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" /></label>
+              <label className="text-sm sm:col-span-2">Dirección<input name="address" value={form.address} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.address && <div className="text-xs text-red-600 mt-1">{errors.address}</div>}</label>
+              <label className="text-sm">Ciudad<input name="city" value={form.city} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.city && <div className="text-xs text-red-600 mt-1">{errors.city}</div>}</label>
+              <label className="text-sm">Provincia<input name="province" value={form.province} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" /></label>
+              <label className="text-sm">Código postal<input name="postal" value={form.postal} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.postal && <div className="text-xs text-red-600 mt-1">{errors.postal}</div>}</label>
+              <label className="text-sm">País<input name="country" value={form.country} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.country && <div className="text-xs text-red-600 mt-1">{errors.country}</div>}</label>
+
               <div className="sm:col-span-2 mt-2">
                 <div className="text-sm font-medium mb-2">🚚 Envío</div>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <label className={cls('flex items-center gap-2 border rounded-xl p-3 cursor-pointer', shipping==='standard'? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200 dark:border-slate-700')}>
-                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping==='standard'} onChange={()=>setShipping('standard')} />
+                  <label className={`flex items-center gap-2 border rounded-xl p-3 cursor-pointer ${shipping === 'standard' ? 'ring-2 ring-sky-500 border-sky-300' : 'border-slate-200'}`}>
+                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping === 'standard'} onChange={()=>setShipping('standard')} />
                     Estándar (3-5 días) — Gratis
                   </label>
-                  <label className={cls('flex items-center gap-2 border rounded-xl p-3 cursor-pointer', shipping==='express'? 'ring-2 ring-sky-500 border-sky-300':'border-slate-200 dark:border-slate-700')}>
-                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping==='express'} onChange={()=>setShipping('express')} />
+                  <label className={`flex items-center gap-2 border rounded-xl p-3 cursor-pointer ${shipping === 'express' ? 'ring-2 ring-sky-500 border-sky-300' : 'border-slate-200'}`}>
+                    <input type="radio" name="ship" className="accent-sky-600" checked={shipping === 'express'} onChange={()=>setShipping('express')} />
                     Express 24/48h — 4,90 €
                   </label>
                 </div>
               </div>
+
               <div className="sm:col-span-2 mt-2">
                 <div className="text-sm font-medium mb-2">💳 Pago con tarjeta (demo)</div>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <label className="text-sm">Número de tarjeta<input name="cardNumber" value={form.cardNumber} onChange={handleChange} placeholder="0000 0000 0000 0000" className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.cardNumber && <div className="text-xs text-red-600 mt-1">{errors.cardNumber}</div>}</label>
-                  <label className="text-sm">Nombre en la tarjeta<input name="cardName" value={form.cardName} onChange={handleChange} className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.cardName && <div className="text-xs text-red-600 mt-1">{errors.cardName}</div>}</label>
-                  <label className="text-sm">Expiración (MM/AA)<input name="exp" value={form.exp} onChange={handleChange} placeholder="12/28" className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.exp && <div className="text-xs text-red-600 mt-1">{errors.exp}</div>}</label>
-                  <label className="text-sm">CVC<input name="cvc" value={form.cvc} onChange={handleChange} placeholder="123" className="mt-1 w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" />{errors.cvc && <div className="text-xs text-red-600 mt-1">{errors.cvc}</div>}</label>
+                  <label className="text-sm">Número de tarjeta<input name="cardNumber" value={form.cardNumber} onChange={handleChange} placeholder="0000 0000 0000 0000" className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.cardNumber && <div className="text-xs text-red-600 mt-1">{errors.cardNumber}</div>}</label>
+                  <label className="text-sm">Nombre en la tarjeta<input name="cardName" value={form.cardName} onChange={handleChange} className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.cardName && <div className="text-xs text-red-600 mt-1">{errors.cardName}</div>}</label>
+                  <label className="text-sm">Expiración (MM/AA)<input name="exp" value={form.exp} onChange={handleChange} placeholder="12/28" className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.exp && <div className="text-xs text-red-600 mt-1">{errors.exp}</div>}</label>
+                  <label className="text-sm">CVC<input name="cvc" value={form.cvc} onChange={handleChange} placeholder="123" className="mt-1 w-full border rounded-xl px-3 py-2" />{errors.cvc && <div className="text-xs text-red-600 mt-1">{errors.cvc}</div>}</label>
                 </div>
               </div>
+
               <div className="sm:col-span-2 mt-4 flex gap-3">
-                <button type="button" onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700">Volver al carrito</button>
-                <button type="submit" className="px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white">Pagar y finalizar</button>
+                <button type="button" onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl bg-slate-100">Volver al carrito</button>
+                <button type="submit" className="px-5 py-3 rounded-2xl bg-slate-900 text-white">Pagar y finalizar</button>
               </div>
             </form>
           </div>
-          <aside className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-fit">
-            <h3 className="font-semibold mb-3">🧾 Resumen del pedido</h3>
+
+          <aside className="p-6 rounded-2xl bg-slate-50 border h-fit">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">🛒 Resumen del pedido</h3>
             <div className="space-y-3">
-              {cart.length===0 ? (
-                <div className="text-sm text-slate-600 dark:text-slate-400">Tu carrito está vacío.</div>
+              {cart.length === 0 ? (
+                <div className="text-sm text-slate-600">Tu carrito está vacío.</div>
               ) : (
-                cart.map(line => (
+                cart.map((line) => (
                   <div key={line.id} className="flex items-center gap-3">
                     <SmartImg srcList={line.srcList} alt={line.title} className="w-12 h-12 rounded-lg object-cover" />
                     <div className="flex-1 text-sm">
                       <div className="font-medium">{line.title}</div>
-                      <div className="text-slate-600 dark:text-slate-400">{line.capacity} · {line.color}</div>
+                      <div className="text-slate-600">{line.capacity} · {line.color}</div>
                     </div>
                     <div className="text-sm">x{line.qty}</div>
                   </div>
                 ))
               )}
             </div>
-            <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4 space-y-1 text-sm">
+            <div className="mt-4 border-t pt-4 space-y-1 text-sm">
               <div className="flex justify-between"><span>Subtotal</span><span>{money(total || 0)}</span></div>
-              <div className="flex justify-between"><span>Envío</span><span>{shippingCost===0?'Gratis':money(shippingCost)}</span></div>
-              <div className="flex justify-between font-semibold text-base mt-1"><span>Total</span><span>{money((total||0)+shippingCost)}</span></div>
+              <div className="flex justify-between"><span>Envío</span><span>{shippingCost === 0 ? 'Gratis' : money(shippingCost)}</span></div>
+              <div className="flex justify-between font-semibold text-base mt-1"><span>Total</span><span>{money((total || 0) + shippingCost)}</span></div>
             </div>
           </aside>
         </section>
@@ -609,26 +562,26 @@
     function Chatbot(){
       const [messages,setMessages] = useState([{role:'bot', text:'¡Hola! Soy el asistente Hydrozen. ¿En qué puedo ayudarte?'}]);
       const [draft,setDraft] = useState('');
-      function send(){ if(!draft.trim()) return; setMessages(m=>[...m,{role:'user',text:draft},{role:'bot',text:'Gracias por tu mensaje. Aquí iría la conexión a un chatbot real.'}]); setDraft(''); }
+      function send(){ if(!draft.trim()) return; setMessages(m=>[...m, {role:'user',text:draft}, {role:'bot',text:'Gracias por tu mensaje. Aquí iría la conexión a un chatbot real.'}]); setDraft(''); }
       return (
         <section className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 h-[70vh] flex flex-col">
+          <div className="lg:col-span-2 p-4 rounded-2xl border bg-white shadow-sm h-[70vh] flex flex-col">
             <div className="flex items-center gap-2 mb-3">💬 <h2 className="text-xl font-semibold">Chatbot de soporte</h2></div>
             <div className="flex-1 overflow-auto space-y-3">
               {messages.map((m,i)=> (
-                <div key={i} className={cls('max-w-[80%] p-3 rounded-2xl', m.role==='bot'? 'bg-slate-100 dark:bg-slate-800':'bg-sky-100 ml-auto')}>
+                <div key={i} className={`max-w-[80%] p-3 rounded-2xl ${m.role==='bot'? 'bg-slate-100':'bg-sky-100 ml-auto'}`}>
                   <p className="text-sm">{m.text}</p>
                 </div>
               ))}
             </div>
             <div className="mt-3 flex gap-2">
-              <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Escribe tu mensaje..." className="flex-1 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900"/>
-              <button onClick={send} className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white">Enviar</button>
+              <input value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Escribe tu mensaje..." className="flex-1 border rounded-xl px-3 py-2"/>
+              <button onClick={send} className="px-4 py-2 rounded-xl bg-sky-600 text-white">Enviar</button>
             </div>
           </div>
-          <aside className="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <aside className="p-5 rounded-2xl bg-slate-50 border">
             <h3 className="font-semibold">Temas frecuentes</h3>
-            <ul className="mt-3 text-sm space-y-2 text-slate-700 dark:text-slate-300">
+            <ul className="mt-3 text-sm list-disc pl-5 space-y-1 text-slate-700">
               <li>¿Cómo funciona el filtro?</li>
               <li>Garantía y devoluciones</li>
               <li>Cuidados y limpieza</li>
@@ -644,15 +597,15 @@
         <section className="grid lg:grid-cols-2 gap-8">
           <div>
             <h2 className="text-2xl font-bold">Distribuidores y Proveedores</h2>
-            <p className="mt-2 text-slate-700 dark:text-slate-300">¿Quieres Hydrozen en tu catálogo o equipar a tu empresa? Déjanos tus datos y te contactaremos.</p>
-            <div className="mt-6 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <p className="mt-2 text-slate-700">¿Quieres Hydrozen en tu catálogo o equipar a tu empresa con nuestras botellas con filtro? Déjanos tus datos y te contactaremos.</p>
+            <div className="mt-6 p-5 rounded-2xl bg-slate-50 border">
               <FormSupplier />
             </div>
           </div>
-          <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-sky-100 to-emerald-50 border">
             <h3 className="text-lg font-semibold">Ventajas B2B</h3>
-            <ul className="mt-3 text-sm space-y-2 text-slate-700 dark:text-slate-300">
-              <li>✔️ Precios por volumen y packs</li>
+            <ul className="mt-3 text-sm space-y-2 text-slate-700">
+              <li>✔️ Precios por volumen y packs personalizables</li>
               <li>✔️ Personalización con tu logo</li>
               <li>✔️ Stock y logística a medida</li>
               <li>✔️ Soporte técnico y postventa</li>
@@ -665,12 +618,12 @@
     function FormSupplier(){
       return (
         <form className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <input className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" placeholder="Nombre"/>
-          <input className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 bg-white dark:bg-slate-900" placeholder="Empresa"/>
-          <input className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 sm:col-span-2 bg-white dark:bg-slate-900" placeholder="Email"/>
-          <input className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 sm:col-span-2 bg-white dark:bg-slate-900" placeholder="Teléfono"/>
-          <textarea className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 sm:col-span-2 bg-white dark:bg-slate-900" rows="4" placeholder="Cuéntanos qué necesitas (volumen, personalización, plazos)..."></textarea>
-          <button type="button" className="mt-2 sm:col-span-2 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl px-4 py-3">Enviar solicitud</button>
+          <input className="border rounded-xl px-3 py-2" placeholder="Nombre"/>
+          <input className="border rounded-xl px-3 py-2" placeholder="Empresa"/>
+          <input className="border rounded-xl px-3 py-2 sm:col-span-2" placeholder="Email"/>
+          <input className="border rounded-xl px-3 py-2 sm:col-span-2" placeholder="Teléfono"/>
+          <textarea className="border rounded-xl px-3 py-2 sm:col-span-2" rows="4" placeholder="Cuéntanos qué necesitas (volumen, personalización, plazos)..."></textarea>
+          <button type="button" className="mt-2 sm:col-span-2 bg-slate-900 text-white rounded-2xl px-4 py-3">Enviar solicitud</button>
         </form>
       );
     }
@@ -680,15 +633,15 @@
         <section className="grid lg:grid-cols-2 gap-8 items-start">
           <div>
             <h2 className="text-2xl font-bold">Nuestra misión</h2>
-            <p className="mt-2 text-slate-700 dark:text-slate-300">Menos plástico de un solo uso y más agua de calidad al alcance de todos. Diseñamos productos duraderos y prácticos.</p>
+            <p className="mt-2 text-slate-700">En Hydrozen creemos en un mundo con menos plástico de un solo uso y más agua de calidad al alcance de todos. Diseñamos productos duraderos, minimalistas y prácticos.</p>
             <div className="mt-6 grid sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"><h4 className="font-semibold">Sostenibilidad</h4><p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Materiales libres de BPA y repuestos.</p></div>
-              <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"><h4 className="font-semibold">Innovación</h4><p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Filtro activo y diseño anti-fugas.</p></div>
+              <div className="p-4 rounded-2xl border bg-white shadow-sm"><h4 className="font-semibold">Sostenibilidad</h4><p className="text-sm text-slate-700 mt-1">Materiales libres de BPA, piezas reemplazables y empaques reciclables.</p></div>
+              <div className="p-4 rounded-2xl border bg-white shadow-sm"><h4 className="font-semibold">Innovación</h4><p className="text-sm text-slate-700 mt-1">Filtro activo y diseño anti-derrames para el día a día.</p></div>
             </div>
           </div>
-          <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-white to-sky-50 border">
             <h3 className="font-semibold flex items-center gap-2">📧 Atención al cliente</h3>
-            <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">Escríbenos a <span className="text-sky-700 dark:text-sky-400 font-medium">soporte@hydrozen.com</span> o usa el chatbot.</p>
+            <p className="text-sm text-slate-700 mt-2">Escríbenos a <span className="text-sky-700 font-medium">soporte@hydrozen.com</span> o usa el chatbot para respuestas rápidas.</p>
           </div>
         </section>
       );
@@ -696,11 +649,11 @@
 
     function Footer({ onNavigate }){
       return (
-        <footer className="mt-16 border-t border-slate-200 dark:border-slate-700">
+        <footer className="mt-16 border-t">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid sm:grid-cols-3 gap-6 text-sm">
             <div>
               <div className="font-semibold">Hydrozen</div>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">Botellas con filtro · menos plástico, más vida.</p>
+              <p className="text-slate-600 mt-1">Botellas con filtro · menos plástico, más vida.</p>
             </div>
             <div className="space-y-2">
               <button onClick={()=>onNavigate('home')} className="block hover:text-sky-700">Inicio</button>
@@ -711,17 +664,17 @@
             </div>
             <div>
               <div className="font-semibold">Legal</div>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Términos · Privacidad · Cookies</p>
+              <p className="text-slate-500 mt-1">Términos · Privacidad · Cookies</p>
             </div>
           </div>
-          <div className="text-center text-xs text-slate-500 dark:text-slate-400 pb-6">© {new Date().getFullYear()} Hydrozen</div>
+          <div className="text-center text-xs text-slate-500 pb-6">© {new Date().getFullYear()} Hydrozen</div>
         </footer>
       );
     }
 
     function FloatingChat({ onNavigate }){
       return (
-        <button onClick={()=>onNavigate('chatbot')} className="fixed bottom-5 right-5 rounded-full shadow-lg bg-sky-600 hover:bg-sky-700 text-white p-3" aria-label="Abrir chatbot">💬</button>
+        <button onClick={()=>onNavigate('chatbot')} className="fixed bottom-5 right-5 rounded-full shadow-lg bg-sky-600 text-white p-3" aria-label="Abrir chatbot">💬</button>
       );
     }
 
@@ -730,7 +683,9 @@
 </body>
 </html>
 
+
        
+
 
 
 
