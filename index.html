@@ -82,6 +82,7 @@
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
             {route==='home' && <>
               <Hero onNavigate={setRoute} />
+              <InteractiveBanner />
               <HomeHighlight cart={cart} setCart={setCart} />
               <Features />
               <CTA onNavigate={setRoute} />
@@ -180,6 +181,32 @@
               </div>
               <div className="p-4">
                 <SmartImg srcList={[ 'hero.jpg','product.jpg','product.png','imagen botella.png','botella.jpg' ]} alt="Hydrozen" className="w-full h-[360px] md:h-full object-cover rounded-2xl" />
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function InteractiveBanner(){
+      const videoRef = React.useRef(null);
+      const [playing,setPlaying] = React.useState(true);
+      const [muted,setMuted] = React.useState(true);
+      const togglePlay = () => { const v = videoRef.current; if(!v) return; if(v.paused){ v.play(); setPlaying(true);} else { v.pause(); setPlaying(false);} };
+      const toggleMute = () => { const v = videoRef.current; if(!v) return; v.muted = !v.muted; setMuted(v.muted); };
+      return (
+        <section className="mb-10">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+            <div className="relative w-full h-64 sm:h-80 md:h-[420px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+              {/* Fondo placeholder si el video no carga */}
+              <div className="absolute inset-0 bg-slate-100 dark:bg-slate-800 grid place-items-center">
+                <div className="text-sm text-slate-500 dark:text-slate-400">Coloca tu vídeo como <code>hero.mp4</code></div>
+              </div>
+              <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" src="hero.mp4" playsInline loop muted={muted} autoPlay />
+              <div className="absolute left-3 top-3 text-xs px-2 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700">Banner interactivo</div>
+              <div className="absolute right-3 bottom-3 flex gap-2">
+                <button onClick={togglePlay} className="rounded-full p-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700">{playing ? '⏸' : '▶️'}</button>
+                <button onClick={toggleMute} className="rounded-full p-2 bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700">{muted ? '🔇' : '🔊'}</button>
               </div>
             </div>
           </div>
@@ -704,6 +731,7 @@
 </html>
 
        
+
 
 
 
