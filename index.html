@@ -25,7 +25,6 @@
     .no-scrollbar::-webkit-scrollbar{ display:none; }
     .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
     html, body, #root { min-height: 100%; }
-    /* Fondo oscuro con halos acuáticos */
     body.hz-dark-ocean {
       background:
         radial-gradient(1200px 800px at -10% -10%, rgba(44,120,196,0.20), transparent 60%),
@@ -34,33 +33,16 @@
         linear-gradient(180deg, #0a1220 0%, #0b1424 100%);
       color: var(--ink-1);
     }
-    .card{
-      background: color-mix(in oklab, var(--bg-2) 88%, white 12%);
-      border: 1px solid color-mix(in oklab, var(--bg-2) 80%, white 20%, transparent 0%);
-    }
-    .glass{
-      background: color-mix(in oklab, var(--bg-2) 70%, transparent 30%);
-      border: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
-    }
-    .btn-primary{
-      background: linear-gradient(90deg, var(--grad-1), var(--grad-2));
-      color: white;
-      box-shadow: 0 10px 24px -10px rgba(34,197,94,.45);
-    }
+    .card{ background: color-mix(in oklab, var(--bg-2) 88%, white 12%); border: 1px solid color-mix(in oklab, var(--bg-2) 80%, white 20%, transparent 0%); }
+    .glass{ background: color-mix(in oklab, var(--bg-2) 70%, transparent 30%); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
+    .btn-primary{ background: linear-gradient(90deg, var(--grad-1), var(--grad-2)); color: white; box-shadow: 0 10px 24px -10px rgba(34,197,94,.45); }
     .btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(34,197,94,.55);}
-    .btn-ghost{
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
-      color: var(--ink-1);
-    }
+    .btn-ghost{ background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: var(--ink-1); }
     .ink-2{ color: var(--ink-2); }
-    /* Focus rings accesibles */
     :is(button,a,input,textarea,select):focus-visible{ outline: 2px solid #38bdf8; outline-offset: 2px; border-radius: .75rem; }
   </style>
 </head>
 <body class="relative hz-dark-ocean text-[15px]">
-  <!-- halos decorativos adicionales -->
   <div aria-hidden class="pointer-events-none fixed inset-0 -z-10">
     <div class="absolute -top-32 -left-32 h-[22rem] w-[22rem] rounded-full bg-sky-400/10 blur-3xl"></div>
     <div class="absolute -top-24 right-[-6%] h-[18rem] w-[18rem] rounded-full bg-emerald-400/10 blur-3xl"></div>
@@ -95,7 +77,6 @@
       </button>
     );
 
-    // Imagen robusta con fallbacks
     function SmartImg({ srcList = [], alt = '', className = '' }) {
       const [idx, setIdx] = useState(0);
       const [failed, setFailed] = useState(false);
@@ -141,6 +122,27 @@
       }
     };
 
+    // === Nuevo: Producto Kids (basado en tu enlace) ===
+    const KIDS_PRODUCT = {
+      id: "kids-tritan-bottle",
+      title: "Klyra Kids – Botella Tritan™",
+      subtitle: "Botellas diseñadas para niños felices y padres tranquilos",
+      heroCopy: "Sin BPA, resistentes y con colores divertidos: la botella perfecta para acompañar a tus peques cada día.",
+      benefits: [
+        { t: "Segura", d: "Fabricada en Tritan™, libre de BPA." },
+        { t: "Resistente", d: "Aguanta caídas y juegos." },
+        { t: "Práctica", d: "Con pajita y fácil de abrir/cerrar." },
+        { t: "Divertida", d: "Colores vivos que encantan a los niños." },
+      ],
+      story: "Sabemos lo difícil que es encontrar una botella que combine seguridad, resistencia y diseño atractivo. Por eso hemos creado una línea pensada para los más pequeños: ligera, duradera y libre de tóxicos. Para que cada sorbo sea alegría… y cada día un poco más fácil para los padres.",
+      packs: [
+        { id:"kids-1", label:"Pack 1 botella", qty:1, price:12.9, compareAt:16.9 },
+        { id:"kids-3", label:"Pack 3 botellas", qty:3, price:34.9, compareAt:44.7 },
+        { id:"kids-5", label:"Pack 5 botellas", qty:5, price:54.9, compareAt:84.5 },
+      ],
+      images: ["kids1.jpg","kids2.jpg","kids-bottle.png","kids-bottle.jpg"]
+    };
+
     const FILTER_PACKS = [
       { id:'pack1', label:'Pack 1', qty:1, price:7.9, compareAt:9.9 },
       { id:'pack5', label:'Pack 5', qty:5, price:34.9, compareAt:39.5 },
@@ -163,6 +165,15 @@
         subtitle: "OFERTA por lanzamiento",
         imageList: ["filtros.jpg","filtros.png","filtros.jpeg"],
         badge: "Oferta"
+      },
+      // Nuevo: tarjeta Kids para catálogo
+      {
+        id: "kids-tritan-bottle",
+        kind: 'kids',
+        title: "Klyra Kids – Tritan™",
+        subtitle: "Botella infantil sin BPA",
+        imageList: KIDS_PRODUCT.images,
+        badge: "Nuevo"
       }
     ];
 
@@ -187,6 +198,7 @@
               </>
             )}
             {route==='products' && <Catalog onNavigate={setRoute} cart={cart} setCart={setCart} />}
+            {route==='kids' && <KidsPage onNavigate={setRoute} cart={cart} setCart={setCart} />}
             {route==='cart' && <Cart cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='checkout' && <Checkout cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='chatbot' && <Chatbot />}
@@ -200,141 +212,110 @@
     }
 
     // ===== UI =====
-function PromoBanner({ onNavigate }) {
-  // === CONFIG ===
-  const slides = [
-    { type: "video", src: "hero2.mp4", poster: "banner1.jpg" }, 
-    { type: "image", src: "banner2.jpg", alt: "Filtro activo Klyra" },
-    { type: "image", src: "banner3.jpg", alt: "Diseño minimalista" },
-  ];
-  const intervalMs = 5000;
+    function PromoBanner({ onNavigate }) {
+      const slides = [
+        { type: "video", src: "hero2.mp4", poster: "banner1.jpg" },
+        { type: "image", src: "banner2.jpg", alt: "Filtro activo Klyra" },
+        { type: "image", src: "banner3.jpg", alt: "Diseño minimalista" },
+      ];
+      const intervalMs = 5000;
+      const [i, setI] = React.useState(0);
+      const timerRef = React.useRef(null);
+      const isHoveringRef = React.useRef(false);
 
-  const [i, setI] = React.useState(0);
-  const timerRef = React.useRef(null);
-  const isHoveringRef = React.useRef(false);
+      const go = (next) => setI((prev) => (prev + next + slides.length) % slides.length);
+      const goTo = (idx) => setI(((idx % slides.length) + slides.length) % slides.length);
 
-  const go = (next) => setI((prev) => (prev + next + slides.length) % slides.length);
-  const goTo = (idx) => setI(((idx % slides.length) + slides.length) % slides.length);
+      React.useEffect(() => {
+        const start = () => {
+          clearInterval(timerRef.current);
+          timerRef.current = setInterval(() => {
+            const curr = slides[i];
+            const vid = curr?.type === "video" ? document.getElementById(`promo-video-${i}`) : null;
+            const videoBusy = vid && !vid.paused && !vid.ended;
+            if (!isHoveringRef.current && !videoBusy) go(1);
+          }, intervalMs);
+        };
+        start();
+        return () => clearInterval(timerRef.current);
+      }, [i, intervalMs, slides]);
 
-  React.useEffect(() => {
-    const start = () => {
-      clearInterval(timerRef.current);
-      timerRef.current = setInterval(() => {
-        const curr = slides[i];
-        const vid = curr?.type === "video" ? document.getElementById(`promo-video-${i}`) : null;
-        const videoBusy = vid && !vid.paused && !vid.ended;
-        if (!isHoveringRef.current && !videoBusy) go(1);
-      }, intervalMs);
-    };
-    start();
-    return () => clearInterval(timerRef.current);
-  }, [i, intervalMs, slides]);
+      return (
+        <section className="mb-6">
+          <div className="relative overflow-hidden rounded-3xl glass shadow-lg p-6 sm:p-10">
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(60% 60% at 10% 10%, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0) 60%), radial-gradient(50% 50% at 90% 20%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)",
+              }}
+            />
+            <div className="relative grid md:grid-cols-2 gap-6 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-sky-400/15 text-sky-200 border border-sky-300/20">
+                  🔥 Lanzamiento
+                </div>
+                <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
+                <p className="mt-2 ink-2">Carrusel mixto con imágenes y vídeo (autoplay, flechas y puntos).</p>
+                <div className="mt-4 flex gap-3">
+                  <button onClick={() => onNavigate("products")} className="px-5 py-3 rounded-2xl btn-primary font-semibold">Ver ofertas</button>
+                  <button onClick={() => onNavigate("kids")} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">Colección Kids</button>
+                </div>
+              </div>
 
-  return (
-    <section className="mb-6">
-      <div className="relative overflow-hidden rounded-3xl glass shadow-lg p-6 sm:p-10">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 10% 10%, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0) 60%), radial-gradient(50% 50% at 90% 20%, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0) 60%)",
-          }}
-        />
-        <div className="relative grid md:grid-cols-2 gap-6 items-center">
-          {/* Texto */}
-          <div>
-            <div className="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-sky-400/15 text-sky-200 border border-sky-300/20">
-              🔥 Lanzamiento
-            </div>
-            <h3 className="mt-3 text-2xl sm:text-3xl font-bold">Banner Interactivo</h3>
-            <p className="mt-2 ink-2">Carrusel mixto con imágenes y vídeo (autoplay, flechas y puntos).</p>
-            <div className="mt-4 flex gap-3">
-              <button onClick={() => onNavigate("products")} className="px-5 py-3 rounded-2xl btn-primary font-semibold">
-                Ver ofertas
-              </button>
-              <button onClick={() => onNavigate("chatbot")} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">
-                Hablar con soporte
-              </button>
-            </div>
-          </div>
+              <div
+                className="relative aspect-video rounded-2xl glass overflow-hidden"
+                onMouseEnter={() => (isHoveringRef.current = true)}
+                onMouseLeave={() => (isHoveringRef.current = false)}
+              >
+                <div className="h-full w-full relative">
+                  {slides.map((s, idx) => {
+                    const visible = idx === i;
+                    return (
+                      <div
+                        key={idx}
+                        className={`absolute inset-0 transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                      >
+                        {s.type === "video" ? (
+                          <video
+                            id={`promo-video-${idx}`}
+                            src={s.src}
+                            poster={s.poster || undefined}
+                            className="w-full h-full object-cover"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img src={s.src} alt={s.alt || ""} className="w-full h-full object-cover" loading="lazy" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
 
-          {/* Carrusel */}
-          <div
-            className="relative aspect-video rounded-2xl glass overflow-hidden"
-            onMouseEnter={() => (isHoveringRef.current = true)}
-            onMouseLeave={() => (isHoveringRef.current = false)}
-          >
-            {/* Slides */}
-            <div className="h-full w-full relative">
-              {slides.map((s, idx) => {
-                const visible = idx === i;
-                return (
-                  <div
-                    key={idx}
-                    className={`absolute inset-0 transition-opacity duration-500 ${
-                      visible ? "opacity-100" : "opacity-0 pointer-events-none"
-                    }`}
-                  >
-                    {s.type === "video" ? (
-                      <video
-                        id={`promo-video-${idx}`}
-                        src={s.src}
-                        poster={s.poster || undefined}
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                      />
-                    ) : (
-                      <img
-                        src={s.src}
-                        alt={s.alt || ""}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                <button aria-label="Anterior" onClick={() => go(-1)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2">◀</button>
+                <button aria-label="Siguiente" onClick={() => go(1)} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2">▶</button>
 
-            {/* Flechas */}
-            <button
-              aria-label="Anterior"
-              onClick={() => go(-1)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2"
-            >
-              ◀
-            </button>
-            <button
-              aria-label="Siguiente"
-              onClick={() => go(1)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-2"
-            >
-              ▶
-            </button>
-
-            {/* Dots */}
-            <div className="absolute left-0 right-0 bottom-2 flex items-center justify-center gap-2">
-              {slides.map((_, idx) => (
-                <button
-                  key={idx}
-                  title={`Ir a slide ${idx + 1}`}
-                  onClick={() => goTo(idx)}
-                  className={`h-2.5 rounded-full transition-all ${
-                    idx === i ? "w-6 bg-sky-400" : "w-2.5 bg-white/40 hover:bg-white/70"
-                  }`}
-                />
-              ))}
+                <div className="absolute left-0 right-0 bottom-2 flex items-center justify-center gap-2">
+                  {slides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      title={`Ir a slide ${idx + 1}`}
+                      onClick={() => goTo(idx)}
+                      className={`h-2.5 rounded-full transition-all ${idx === i ? "w-6 bg-sky-400" : "w-2.5 bg-white/40 hover:bg-white/70"}`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+        </section>
+      );
+    }
+
     function TopBar({ onNavigate, cartCount, current }){
       return (
         <header className="fixed top-0 left-0 right-0 z-40 glass border-b border-white/10">
@@ -349,6 +330,7 @@ function PromoBanner({ onNavigate }) {
             <nav className="hidden sm:flex items-center gap-5">
               <NavLink active={current==='home'} onClick={()=>onNavigate('home')}>Inicio</NavLink>
               <NavLink active={current==='products'} onClick={()=>onNavigate('products')}>Productos</NavLink>
+              <NavLink active={current==='kids'} onClick={()=>onNavigate('kids')}>Kids</NavLink>
               <NavLink active={current==='about'} onClick={()=>onNavigate('about')}>Nosotros</NavLink>
               <NavLink active={current==='suppliers'} onClick={()=>onNavigate('suppliers')}>Proveedores</NavLink>
               <NavLink active={current==='chatbot'} onClick={()=>onNavigate('chatbot')}>Chatbot</NavLink>
@@ -380,7 +362,7 @@ function PromoBanner({ onNavigate }) {
                 <p className="mt-3 sm:mt-4 text-sm sm:text-base ink-2">Presentamos <b>Klyra Bottle</b>: tapa a prueba de fugas, filtro integrado y diseño minimalista.</p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl btn-primary font-semibold">Ver productos</button>
-                  <button onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">Comprar ahora</button>
+                  <button onClick={()=>onNavigate('kids')} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">Colección Kids</button>
                 </div>
               </div>
               <div className="absolute right-4 bottom-4 flex items-center gap-2 z-20">
@@ -486,7 +468,7 @@ function PromoBanner({ onNavigate }) {
           <div className="flex items-end justify-between gap-4 mb-6">
             <div>
               <h2 className="text-2xl font-bold">Nuestros productos</h2>
-              <p className="ink-2">Descubre la botella Klyra y los <span className="font-medium text-emerald-300">filtros en oferta</span>.</p>
+              <p className="ink-2">Descubre la botella Klyra, la <span className="font-medium text-emerald-300">colección Kids</span> y los filtros en oferta.</p>
             </div>
             <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-2xl btn-primary active:scale-[.99]">Ver carrito</button>
           </div>
@@ -495,7 +477,10 @@ function PromoBanner({ onNavigate }) {
             {CATALOG.map(p=> (
               <article key={p.id} className="group rounded-2xl overflow-hidden glass shadow-md transition hover:-translate-y-0.5 hover:shadow-xl">
                 <div className="relative">
-                  <button className="absolute inset-0 z-10" onClick={()=>setModal({type:p.kind, product:p})} aria-label="Abrir detalles" />
+                  <button className="absolute inset-0 z-10" onClick={()=>{
+                    if(p.kind==='kids'){ onNavigate('kids'); return; }
+                    setModal({type:p.kind, product:p});
+                  }} aria-label="Abrir detalles" />
                   <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
                   {p.badge && (
                     <span className={cls('absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full border',
@@ -507,14 +492,11 @@ function PromoBanner({ onNavigate }) {
                 <div className="p-4">
                   <h3 className="font-semibold leading-tight">{p.title}</h3>
                   <p className="text-sm ink-2 mt-1">{p.subtitle}</p>
-                  {p.kind==='filter' && (
-                    <div className="mt-2 text-sm">
-                      <span className="inline-flex items-center gap-1 bg-rose-500/15 text-rose-100 px-2 py-1 rounded-full border border-rose-300/20">🔥 En oferta</span>
-                      <span className="ml-2 text-slate-300/80">elige pack al abrir</span>
-                    </div>
-                  )}
                   <div className="mt-4 flex gap-2">
-                    <button onClick={()=>setModal({type:p.kind, product:p})} className="flex-1 px-4 py-2 rounded-xl btn-primary">Ver opciones</button>
+                    <button onClick={()=>{
+                      if(p.kind==='kids'){ onNavigate('kids'); return; }
+                      setModal({type:p.kind, product:p});
+                    }} className="flex-1 px-4 py-2 rounded-xl btn-primary">Ver opciones</button>
                     <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl btn-ghost hover:bg-white/10">Carrito</button>
                   </div>
                 </div>
@@ -681,8 +663,113 @@ function PromoBanner({ onNavigate }) {
               </div>
               <div className="flex gap-3">
                 <button onClick={()=>onNavigate('products')} className="px-6 py-3 rounded-2xl btn-ghost hover:bg-white/10">Ver productos</button>
-                <button onClick={()=>onNavigate('cart')} className="px-6 py-3 rounded-2xl btn-primary font-semibold">Comprar Klyra</button>
+                <button onClick={()=>onNavigate('kids')} className="px-6 py-3 rounded-2xl btn-primary font-semibold">Comprar Kids</button>
               </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ===== Nueva página: Kids (storytelling + packs + opiniones) =====
+    function KidsPage({ onNavigate, cart, setCart }){
+      const addPack = (pack)=>{
+        const line = {
+          id: `${KIDS_PRODUCT.id}-${pack.id}`,
+          title: `${KIDS_PRODUCT.title} · ${pack.label}`,
+          color: '—',
+          capacity: pack.label,
+          price: pack.price,
+          qty: 1,
+          srcList: KIDS_PRODUCT.images
+        };
+        setCart(prev=>{
+          const i = prev.findIndex(x=>x.id===line.id);
+          if(i>=0){ const cp=[...prev]; cp[i] = { ...cp[i], qty: cp[i].qty + 1 }; return cp; }
+          return [...prev, line];
+        });
+      };
+
+      return (
+        <section className="space-y-10">
+          {/* Hero Kids */}
+          <div className="rounded-[2rem] glass p-8 md:p-12 grid md:grid-cols-2 gap-6 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-full bg-emerald-400/15 text-emerald-200 border border-emerald-300/20">👶 Kids · Sin BPA</div>
+              <h1 className="mt-3 text-3xl sm:text-5xl font-extrabold leading-[1.05]">Botellas diseñadas para niños felices y padres tranquilos</h1>
+              <p className="mt-3 ink-2">{KIDS_PRODUCT.heroCopy}</p>
+              <div className="mt-5 flex gap-3">
+                <button onClick={()=>onNavigate('cart')} className="px-5 py-3 rounded-2xl btn-primary font-semibold">Comprar ahora</button>
+                <button onClick={()=>onNavigate('products')} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">Ver catálogo</button>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="aspect-video rounded-2xl overflow-hidden glass">
+                <SmartImg srcList={KIDS_PRODUCT.images} alt="Klyra Kids" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+
+          {/* Beneficios */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {KIDS_PRODUCT.benefits.map(b=>(
+              <div key={b.t} className="p-5 rounded-2xl glass">
+                <h3 className="font-semibold">{b.t}</h3>
+                <p className="text-sm ink-2 mt-1">{b.d}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Storytelling */}
+          <div className="p-8 rounded-3xl glass">
+            <h3 className="text-xl font-bold">Pensadas para su día a día</h3>
+            <p className="mt-2 ink-2">{KIDS_PRODUCT.story}</p>
+          </div>
+
+          {/* Packs */}
+          <div>
+            <div className="flex items-center justify-between">
+              <h3 className="text-2xl font-bold">Elige tu pack</h3>
+              <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl btn-ghost hover:bg-white/10">Ver carrito</button>
+            </div>
+            <div className="mt-4 grid sm:grid-cols-3 gap-4">
+              {KIDS_PRODUCT.packs.map(pk=>{
+                const saving = Math.round((1 - (pk.price/pk.compareAt)) * 100);
+                return (
+                  <div key={pk.id} className="p-5 rounded-2xl glass border border-white/10">
+                    <div className="text-lg font-semibold">{pk.label}</div>
+                    <div className="text-sm ink-2">{pk.qty} unidad{pk.qty>1?'es':''}</div>
+                    <div className="mt-2 flex items-end gap-2">
+                      <div className="text-2xl font-bold">{money(pk.price)}</div>
+                      <div className="text-sm ink-2 line-through">{money(pk.compareAt)}</div>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-200 border border-emerald-300/20">Ahorra {saving}%</span>
+                    </div>
+                    <button onClick={()=>addPack(pk)} className="mt-4 w-full py-2.5 rounded-xl btn-primary">Añadir {pk.label}</button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Opiniones */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl glass">
+              <p className="text-sm">“Mi hijo la lleva al cole cada día, le encanta el color y yo estoy tranquila porque no tiene BPA.”</p>
+              <div className="mt-2 text-xs ink-2">— Marta, Madrid</div>
+            </div>
+            <div className="p-5 rounded-2xl glass">
+              <p className="text-sm">“Por fin una botella que aguanta las caídas y no se rompe a la primera.”</p>
+              <div className="mt-2 text-xs ink-2">— David, Valencia</div>
+            </div>
+          </div>
+
+          {/* CTA final */}
+          <div className="rounded-[2rem] p-8 glass text-center">
+            <h3 className="text-2xl font-bold">Haz que la hidratación sea segura y divertida</h3>
+            <p className="ink-2 mt-1">Elige tu pack y recíbelo en casa en pocos días.</p>
+            <div className="mt-4 flex justify-center gap-3">
+              <button onClick={()=>onNavigate('cart')} className="px-6 py-3 rounded-2xl btn-primary font-semibold">Comprar ahora</button>
+              <button onClick={()=>onNavigate('products')} className="px-6 py-3 rounded-2xl btn-ghost hover:bg-white/10">Ver más productos</button>
             </div>
           </div>
         </section>
@@ -937,6 +1024,7 @@ function PromoBanner({ onNavigate }) {
             <div className="space-y-2">
               <button onClick={()=>onNavigate('home')} className="block text-left text-slate-300/90 hover:text-white">Inicio</button>
               <button onClick={()=>onNavigate('products')} className="block text-left text-slate-300/90 hover:text-white">Productos</button>
+              <button onClick={()=>onNavigate('kids')} className="block text-left text-slate-300/90 hover:text-white">Kids</button>
               <button onClick={()=>onNavigate('about')} className="block text-left text-slate-300/90 hover:text-white">Nosotros</button>
               <button onClick={()=>onNavigate('suppliers')} className="block text-left text-slate-300/90 hover:text-white">Proveedores</button>
               <button onClick={()=>onNavigate('chatbot')} className="block text-left text-slate-300/90 hover:text-white">Chatbot</button>
@@ -964,7 +1052,9 @@ function PromoBanner({ onNavigate }) {
 
 
 
+
        
+
 
 
 
