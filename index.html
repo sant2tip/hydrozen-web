@@ -725,32 +725,7 @@
             <h3 className="text-xl font-bold">Pensadas para su día a día</h3>
             <p className="mt-2 ink-2">{KIDS_PRODUCT.story}</p>
           </div>
-
-          {/* Packs */}
-          <div>
-            <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-bold">Elige tu pack</h3>
-              <button onClick={()=>onNavigate('cart')} className="px-4 py-2 rounded-xl btn-ghost hover:bg-white/10">Ver carrito</button>
-            </div>
-            <div className="mt-4 grid sm:grid-cols-3 gap-4">
-              {KIDS_PRODUCT.packs.map(pk=>{
-                const saving = Math.round((1 - (pk.price/pk.compareAt)) * 100);
-                return (
-                  <div key={pk.id} className="p-5 rounded-2xl glass border border-white/10">
-                    <div className="text-lg font-semibold">{pk.label}</div>
-                    <div className="text-sm ink-2">{pk.qty} unidad{pk.qty>1?'es':''}</div>
-                    <div className="mt-2 flex items-end gap-2">
-                      <div className="text-2xl font-bold">{money(pk.price)}</div>
-                      <div className="text-sm ink-2 line-through">{money(pk.compareAt)}</div>
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-200 border border-emerald-300/20">Ahorra {saving}%</span>
-                    </div>
-                    <button onClick={()=>addPack(pk)} className="mt-4 w-full py-2.5 rounded-xl btn-primary">Añadir {pk.label}</button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
+          
           {/* Opiniones */}
           <div className="grid md:grid-cols-2 gap-4">
             <div className="p-5 rounded-2xl glass">
@@ -1054,6 +1029,7 @@
 
 
        
+
 
 
 
