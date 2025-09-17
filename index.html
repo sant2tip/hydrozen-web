@@ -556,6 +556,41 @@ alibabaUrl: "https://www.alibaba.com/product-detail/2024-Hot-Selling-OEM-ODM-Por
         </section>
       );
     }
+ function OEMModal({ onClose, onNavigate }){
+const [imgIndex, setImgIndex] = React.useState(0);
+return (
+<ModalShell onClose={onClose}>
+<div className="rounded-2xl overflow-hidden glass shadow-2xl">
+<div className="grid md:grid-cols-2">
+<div className="relative">
+<SmartImg srcList={OEM_PRODUCT.images} alt={OEM_PRODUCT.title} className="w-full h-72 md:h-full object-cover" />
+<div className="absolute left-3 top-3 bg-white/10 backdrop-blur rounded-xl px-3 py-1 text-xs border border-white/15">B2B · OEM/ODM</div>
+</div>
+<div className="p-6">
+<div className="flex items-center justify-between">
+<h3 className="text-xl font-semibold">{OEM_PRODUCT.title}</h3>
+<button onClick={onClose} className="text-slate-200/80 hover:text-white">✕</button>
+</div>
+<p className="ink-2 mt-1">{OEM_PRODUCT.subtitle}</p>
+<ul className="mt-4 space-y-2 text-sm">
+{OEM_PRODUCT.bullets.map((b,i)=> (<li key={i}>✔️ {b}</li>))}
+</ul>
+<div className="mt-4 text-sm ink-2">
+<div><b>Capacidades:</b> {OEM_PRODUCT.specs.capacity.join(', ')}</div>
+<div><b>Materiales:</b> {OEM_PRODUCT.specs.materials}</div>
+<div><b>MOQ:</b> {OEM_PRODUCT.specs.moq}</div>
+</div>
+<div className="mt-5 flex flex-wrap gap-3">
+<a href={OEM_PRODUCT.alibabaUrl} target="_blank" rel="noopener noreferrer" className="px-5 py-3 rounded-2xl btn-primary font-semibold">Ver en Alibaba</a>
+<button onClick={()=>{ onClose(); onNavigate('suppliers'); }} className="px-5 py-3 rounded-2xl btn-ghost hover:bg-white/10">Solicitar presupuesto</button>
+</div>
+<p className="text-[11px] ink-2 mt-3">* Producto orientado a distribución/branding. La venta minorista puede requerir configuración distinta.</p>
+</div>
+</div>
+</div>
+</ModalShell>
+);
+}
 
     // ===== Modales =====
     function ModalShell({ children, onClose }){
@@ -1063,6 +1098,7 @@ alibabaUrl: "https://www.alibaba.com/product-detail/2024-Hot-Selling-OEM-ODM-Por
 
 
        
+
 
 
 
