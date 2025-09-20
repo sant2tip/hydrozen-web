@@ -469,6 +469,13 @@
     
 
 function HomeCarousel({ onNavigate }){
+  const [modal, setModal] = useState(null);
+  const [cat, setCat] = useState('all'); // all | bottle | kids | filter
+
+  const visible = useMemo(()=>{
+    if (cat === 'all') return CATALOG;
+    return CATALOG.filter(p => p.kind === cat);
+  }, [cat]);
   return (
     <section className="mt-6">
       <div className="flex items-center justify-between mb-3">
@@ -491,7 +498,7 @@ function HomeCarousel({ onNavigate }){
                 <div className="p-3">
                   <h3 className="font-semibold leading-tight">{p.title}</h3>
                   <p className="text-sm ink-2">{p.subtitle}</p>
-                  <div className="mt-3"><button onClick={()=>onNavigate('catalog')} className="px-3 py-2 rounded-xl btn-primary">Comprar</button></div>
+                  <div className="mt-3"><button onClick={()=>onNavigate('Productos')} className="px-3 py-2 rounded-xl btn-primary">Comprar</button></div>
                 </div>
               </button>
             </article>
@@ -1098,6 +1105,7 @@ function Catalog({ onNavigate, cart, setCart }){
 
 
        
+
 
 
 
