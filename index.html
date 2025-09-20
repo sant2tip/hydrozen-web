@@ -469,13 +469,6 @@
     
 
 function HomeCarousel({ onNavigate }){
-  const [modal, setModal] = useState(null);
-  const [cat, setCat] = useState('all'); // all | bottle | kids | filter
-
-  const visible = useMemo(()=>{
-    if (cat === 'all') return CATALOG;
-    return CATALOG.filter(p => p.kind === cat);
-  }, [cat]);
   return (
     <section className="mt-6">
       <div className="flex items-center justify-between mb-3">
@@ -490,7 +483,7 @@ function HomeCarousel({ onNavigate }){
             <article key={p.id}
               className="min-w-[82%] sm:min-w-[48%] lg:min-w-[32%] snap-center rounded-2xl overflow-hidden glass border border-white/10"
             >
-              <button className="block text-left w-full" onClick={()=>onNavigate('catalog')} aria-label={"Ver " + p.title}>
+              <div className="block text-left w-full cursor-pointer" role="button" tabIndex={0} onClick={()=>onNavigate('catalog')} onKeyDown={(e)=> e.key==='Enter' && onNavigate('catalog')}>
                 <div className="relative">
                   <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-48 sm:h-56 object-cover" />
                   {p.badge && <span className="absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full border bg-white/10">{p.badge}</span>}
@@ -498,7 +491,7 @@ function HomeCarousel({ onNavigate }){
                 <div className="p-3">
                   <h3 className="font-semibold leading-tight">{p.title}</h3>
                   <p className="text-sm ink-2">{p.subtitle}</p>
-                  <div className="mt-3"><button onClick={()=>onNavigate('Productos')} className="px-3 py-2 rounded-xl btn-primary">Comprar</button></div>
+                  <div className="mt-3"><button onClick={()=>onNavigate('catalog')} className="px-3 py-2 rounded-xl btn-primary">Comprar</div></div>
                 </div>
               </button>
             </article>
@@ -508,6 +501,8 @@ function HomeCarousel({ onNavigate }){
     </section>
   );
 }
+
+
 
 function Catalog({ onNavigate, cart, setCart }){
   const [modal, setModal] = useState(null);
@@ -1105,6 +1100,7 @@ function Catalog({ onNavigate, cart, setCart }){
 
 
        
+
 
 
 
