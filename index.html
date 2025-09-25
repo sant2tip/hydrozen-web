@@ -100,6 +100,7 @@
       const onError = () => { if (idx + 1 < srcList.length) setIdx(idx + 1); else setFailed(true); };
       return <img src={src} alt={alt} className={className} onError={onError} loading='lazy'/>;
     }
+   
 
     /* ===== Datos ===== */
     const COLORS = [
@@ -197,6 +198,13 @@
                 <HeroBanner onNavigate={setRoute} />
                 <HomeProductIntro cart={cart} setCart={setCart} />
                 <Features />
+                    <PromoBanner onNavigate={setRoute} />
+    <HeroBanner onNavigate={setRoute} />
+
+    <CatalogCarousel onNavigate={setRoute} /> 
+
+    <Features />
+
                 <CTA onNavigate={setRoute} />
               </>
             )}
@@ -718,6 +726,122 @@
         </section>
       );
     }
+     /* ===== Carrusel del catálogo con autoplay y dots (HOME) ===== */
+function CatalogCarousel({ onNavigate }){
+  const scrollerRef = React.useRef(null);
+  const [index, setIndex] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  const items = CATALOG;       // usa tu array CATALOG existente
+  const INTERVAL = 4500;       // autoplay ms
+
+  const scrollToIndex = (i)=>{
+    const el = scrollerRef.current;
+    if(!el) return;
+    const child = el.children[i];
+    if(child) child.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+  };
+
+  // autoplay
+  React.useEffect(()=>{
+    if(paused || !items?.length) return;
+    const id = setInterval(()=>{
+      setIndex(prev => {
+        const next = (prev + 1) % items.length;
+        scrollToIndex(next);
+        return next;
+      });
+    }, INTERVAL);
+    return ()=> clearInterval(id);
+  }, [paused, items?.length]);
+
+  // sincroniza el índice al hacer scroll manual
+  React.useEffect(()=>{
+    const el = scrollerRef.current;
+    if(!el) return;
+    const handler = ()=>{
+      const w = el.clientWidth;
+      const approx = w * 0.9; // ancho aprox de card visible
+      const i = Math.round(el.scrollLeft / approx);
+      setIndex(Math.max(0, Math.min((items?.length||1)-1, i)));
+    };
+    el.addEventListener('scroll', handler, { passive: true });
+    return ()=> el.removeEventListener('scroll', handler);
+  }, [items?.length]);
+
+  const scrollBy = (dir)=>{
+    setPaused(true);
+    const el = scrollerRef.current;
+    if(!el) return;
+    const w = el.clientWidth;
+    el.scrollBy({left: dir*w*0.9, behavior: 'smooth'});
+    setTimeout(()=>setPaused(false), 2000);
+  };
+
+  if(!items?.length) return null;
+
+  return (
+    <section className="py-10">
+      <div className="flex items-end justify-between gap-4 mb-4">
+        <div>
+          <h2 className="text-2xl font-bold md:text-3xl">Explora el catálogo</h2>
+          <p className="ink-2 text-sm">Desliza o espera: pasa solo. Toca los puntos para saltar.</p>
+        </div>
+        <div className="hidden sm:flex gap-2">
+          <button aria-label="Anterior" onClick={()=>scrollBy(-1)} className="rounded-xl px-3 py-2 bg-white/10 border border-white/15">◀</button>
+          <button aria-label="Siguiente" onClick={()=>scrollBy(1)} className="rounded-xl px-3 py-2 bg-white/10 border border-white/15">▶</button>
+        </div>
+      </div>
+
+      <div
+        ref={scrollerRef}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
+        onMouseEnter={()=>setPaused(true)}
+        onMouseLeave={()=>setPaused(false)}
+        onTouchStart={()=>setPaused(true)}
+        onTouchEnd={()=>setTimeout(()=>setPaused(false), 1500)}
+      >
+        {items.map((p)=> (
+          <article key={p.id} className="shrink-0 w-[88%] sm:w-[46%] lg:w-[32%] snap-center rounded-2xl overflow-hidden glass shadow-md">
+            <div className="relative">
+              {/* Navega: si es kids ve a 'kids', si no a 'products' */}
+              <button className="absolute inset-0 z-10"
+                onClick={()=> onNavigate?.(p.kind==='kids' ? 'kids' : 'products')}
+                aria-label={`Abrir ${p.title}`} />
+              {/* Usa tu SmartImg existente; si no, reemplaza por <img src={p.imageList?.[0]} .../> */}
+              <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-48 md:h-56 object-cover" />
+              {p.badge && (
+                <span className={`absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full border ${p.badge==='Oferta' ? 'bg-rose-400/20 text-rose-100 border-rose-300/25' : 'bg-sky-400/20 text-sky-100 border-sky-300/25'}`}>
+                  {p.badge}
+                </span>
+              )}
+            </div>
+            <div className="p-4">
+              <h3 className="font-semibold leading-tight">{p.title}</h3>
+              <p className="text-sm ink-2 mt-1">{p.subtitle}</p>
+              <div className="mt-4 flex gap-2">
+                <button onClick={()=> onNavigate?.(p.kind==='kids' ? 'kids' : 'products')} className="flex-1 px-4 py-2 rounded-xl btn-primary">Ver</button>
+                <button onClick={()=> onNavigate?.('products')} className="px-4 py-2 rounded-xl btn-ghost hover:bg-white/10">Más</button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* Dots */}
+      <div className="mt-4 flex items-center justify-center gap-2">
+        {items.map((_, i)=>(
+          <button
+            key={i}
+            aria-label={`Ir al slide ${i+1}`}
+            onClick={()=>{ setPaused(true); setIndex(i); scrollToIndex(i); setTimeout(()=>setPaused(false), 2000); }}
+            className={`h-2.5 rounded-full transition-all ${i===index? 'w-6 bg-sky-400' : 'w-2.5 bg-white/35 hover:bg-white/60'}`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 
     function Features(){
       const items = [
@@ -1029,6 +1153,7 @@
   </script>
 </body>
 </html>
+
 
 
 
