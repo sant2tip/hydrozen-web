@@ -100,7 +100,6 @@
       const onError = () => { if (idx + 1 < srcList.length) setIdx(idx + 1); else setFailed(true); };
       return <img src={src} alt={alt} className={className} onError={onError} loading='lazy'/>;
     }
-   
 
     /* ===== Datos ===== */
     const COLORS = [
@@ -194,18 +193,23 @@
           <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24'>
             {route==='home' && (
               <>
-                    <PromoBanner onNavigate={setRoute} />
-    <HeroBanner onNavigate={setRoute} />
+                <PromoBanner onNavigate={setRoute} />
+                <HeroBanner onNavigate={setRoute} />
 
-    <CatalogCarousel onNavigate={setRoute} /> 
+                {/* Contenedor del Canvas 3D */}
+                <section className="relative my-8">
+                  <div className="relative h-[54vh] md:h-[68vh] overflow-hidden rounded-[2rem] glass">
+                    <div id="klyra-3d" className="w-full h-full"></div>
+                  </div>
+                </section>
 
-    <Features />
-
+                <CatalogCarousel onNavigate={setRoute} />
+                <Features />
                 <CTA onNavigate={setRoute} />
               </>
             )}
             {route==='products' && <Catalog onNavigate={setRoute} cart={cart} setCart={setCart} />}
-            {route==='kids' && <KidsPage onNavigate={setRoute} cart={cart} setCart={setCart} />}
+            {route==='kids' && <KidsPage onNavigate={setRoute} />}
             {route==='cart' && <Cart cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='checkout' && <Checkout cart={cart} setCart={setCart} total={cartTotal} onNavigate={setRoute} />}
             {route==='chatbot' && <Chatbot />}
@@ -217,6 +221,7 @@
         </div>
       );
     }
+
     /* ===== TopBar con menú móvil ===== */
     function TopBar({ onNavigate, cartCount, current }){
       const [open, setOpen] = useState(false);
@@ -273,326 +278,6 @@
         </header>
       );
     }
-    /* eslint-disable react/no-unknown-property */
-import * as THREE from 'three';
-import { useRef, useState, useEffect, memo, ReactNode } from 'react';
-import { Canvas, createPortal, useFrame, useThree, ThreeElements } from '@react-three/fiber';
-import {
-  useFBO,
-  useGLTF,
-  useScroll,
-  Image,
-  Scroll,
-  Preload,
-  ScrollControls,
-  MeshTransmissionMaterial,
-  Text
-} from '@react-three/drei';
-import { easing } from 'maath';
-
-type Mode = 'lens' | 'bar' | 'cube';
-
-interface NavItem {
-  label: string;
-  link: string;
-}
-
-type ModeProps = Record<string, unknown>;
-
-interface FluidGlassProps {
-  mode?: Mode;
-  lensProps?: ModeProps;
-  barProps?: ModeProps;
-  cubeProps?: ModeProps;
-}
-
-export default function FluidGlass({ mode = 'lens', lensProps = {}, barProps = {}, cubeProps = {} }: FluidGlassProps) {
-  const Wrapper = mode === 'bar' ? Bar : mode === 'cube' ? Cube : Lens;
-  const rawOverrides = mode === 'bar' ? barProps : mode === 'cube' ? cubeProps : lensProps;
-
-  const {
-    navItems = [
-      { label: 'Home', link: '' },
-      { label: 'About', link: '' },
-      { label: 'Contact', link: '' }
-    ],
-    ...modeProps
-  } = rawOverrides;
-
-  return (
-    <Canvas camera={{ position: [0, 0, 20], fov: 15 }} gl={{ alpha: true }}>
-      <ScrollControls damping={0.2} pages={3} distance={0.4}>
-        {mode === 'bar' && <NavItems items={navItems as NavItem[]} />}
-        <Wrapper modeProps={modeProps}>
-          <Scroll>
-            <Typography />
-            <Images />
-          </Scroll>
-          <Scroll html />
-          <Preload />
-        </Wrapper>
-      </ScrollControls>
-    </Canvas>
-  );
-}
-
-type MeshProps = ThreeElements['mesh'];
-
-interface ModeWrapperProps extends MeshProps {
-  children?: ReactNode;
-  glb: string;
-  geometryKey: string;
-  lockToBottom?: boolean;
-  followPointer?: boolean;
-  modeProps?: ModeProps;
-}
-
-interface ZoomMaterial extends THREE.Material {
-  zoom: number;
-}
-
-interface ZoomMesh extends THREE.Mesh<THREE.BufferGeometry, ZoomMaterial> {}
-
-type ZoomGroup = THREE.Group & { children: ZoomMesh[] };
-
-const ModeWrapper = memo(function ModeWrapper({
-  children,
-  glb,
-  geometryKey,
-  lockToBottom = false,
-  followPointer = true,
-  modeProps = {},
-  ...props
-}: ModeWrapperProps) {
-  const ref = useRef<THREE.Mesh>(null!);
-  const { nodes } = useGLTF(glb);
-  const buffer = useFBO();
-  const { viewport: vp } = useThree();
-  const [scene] = useState<THREE.Scene>(() => new THREE.Scene());
-  const geoWidthRef = useRef<number>(1);
-
-  useEffect(() => {
-    const geo = (nodes[geometryKey] as THREE.Mesh)?.geometry;
-    geo.computeBoundingBox();
-    geoWidthRef.current = geo.boundingBox!.max.x - geo.boundingBox!.min.x || 1;
-  }, [nodes, geometryKey]);
-
-  useFrame((state, delta) => {
-    const { gl, viewport, pointer, camera } = state;
-    const v = viewport.getCurrentViewport(camera, [0, 0, 15]);
-
-    const destX = followPointer ? (pointer.x * v.width) / 2 : 0;
-    const destY = lockToBottom ? -v.height / 2 + 0.2 : followPointer ? (pointer.y * v.height) / 2 : 0;
-    easing.damp3(ref.current.position, [destX, destY, 15], 0.15, delta);
-
-    if ((modeProps as { scale?: number }).scale == null) {
-      const maxWorld = v.width * 0.9;
-      const desired = maxWorld / geoWidthRef.current;
-      ref.current.scale.setScalar(Math.min(0.15, desired));
-    }
-
-    gl.setRenderTarget(buffer);
-    gl.render(scene, camera);
-    gl.setRenderTarget(null);
-    gl.setClearColor(0x5227ff, 1);
-  });
-
-  const { scale, ior, thickness, anisotropy, chromaticAberration, ...extraMat } = modeProps as {
-    scale?: number;
-    ior?: number;
-    thickness?: number;
-    anisotropy?: number;
-    chromaticAberration?: number;
-    [key: string]: unknown;
-  };
-
-  return (
-    <>
-      {createPortal(children, scene)}
-      <mesh scale={[vp.width, vp.height, 1]}>
-        <planeGeometry />
-        <meshBasicMaterial map={buffer.texture} transparent />
-      </mesh>
-      <mesh
-        ref={ref}
-        scale={scale ?? 0.15}
-        rotation-x={Math.PI / 2}
-        geometry={(nodes[geometryKey] as THREE.Mesh)?.geometry}
-        {...props}
-      >
-        <MeshTransmissionMaterial
-          buffer={buffer.texture}
-          ior={ior ?? 1.15}
-          thickness={thickness ?? 5}
-          anisotropy={anisotropy ?? 0.01}
-          chromaticAberration={chromaticAberration ?? 0.1}
-          {...(typeof extraMat === 'object' && extraMat !== null ? extraMat : {})}
-        />
-      </mesh>
-    </>
-  );
-});
-
-function Lens({ modeProps, ...p }: { modeProps?: ModeProps } & MeshProps) {
-  return <ModeWrapper glb="/assets/3d/lens.glb" geometryKey="Cylinder" followPointer modeProps={modeProps} {...p} />;
-}
-
-function Cube({ modeProps, ...p }: { modeProps?: ModeProps } & MeshProps) {
-  return <ModeWrapper glb="/assets/3d/cube.glb" geometryKey="Cube" followPointer modeProps={modeProps} {...p} />;
-}
-
-function Bar({ modeProps = {}, ...p }: { modeProps?: ModeProps } & MeshProps) {
-  const defaultMat = {
-    transmission: 1,
-    roughness: 0,
-    thickness: 10,
-    ior: 1.15,
-    color: '#ffffff',
-    attenuationColor: '#ffffff',
-    attenuationDistance: 0.25
-  };
-
-  return (
-    <ModeWrapper
-      glb="/assets/3d/bar.glb"
-      geometryKey="Cube"
-      lockToBottom
-      followPointer={false}
-      modeProps={{ ...defaultMat, ...modeProps }}
-      {...p}
-    />
-  );
-}
-
-function NavItems({ items }: { items: NavItem[] }) {
-  const group = useRef<THREE.Group>(null!);
-  const { viewport, camera } = useThree();
-
-  const DEVICE = {
-    mobile: { max: 639, spacing: 0.2, fontSize: 0.035 },
-    tablet: { max: 1023, spacing: 0.24, fontSize: 0.045 },
-    desktop: { max: Infinity, spacing: 0.3, fontSize: 0.045 }
-  };
-  const getDevice = () => {
-    const w = window.innerWidth;
-    return w <= DEVICE.mobile.max ? 'mobile' : w <= DEVICE.tablet.max ? 'tablet' : 'desktop';
-  };
-
-  const [device, setDevice] = useState<keyof typeof DEVICE>(getDevice());
-
-  useEffect(() => {
-    const onResize = () => setDevice(getDevice());
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
-  const { spacing, fontSize } = DEVICE[device];
-
-  useFrame(() => {
-    if (!group.current) return;
-    const v = viewport.getCurrentViewport(camera, [0, 0, 15]);
-    group.current.position.set(0, -v.height / 2 + 0.2, 15.1);
-
-    group.current.children.forEach((child, i) => {
-      child.position.x = (i - (items.length - 1) / 2) * spacing;
-    });
-  });
-
-  const handleNavigate = (link: string) => {
-    if (!link) return;
-    link.startsWith('#') ? (window.location.hash = link) : (window.location.href = link);
-  };
-
-  return (
-    <group ref={group} renderOrder={10}>
-      {items.map(({ label, link }) => (
-        <Text
-          key={label}
-          fontSize={fontSize}
-          color="white"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0}
-          outlineBlur="20%"
-          outlineColor="#000"
-          outlineOpacity={0.5}
-          renderOrder={10}
-          onClick={e => {
-            e.stopPropagation();
-            handleNavigate(link);
-          }}
-          onPointerOver={() => (document.body.style.cursor = 'pointer')}
-          onPointerOut={() => (document.body.style.cursor = 'auto')}
-        >
-          {label}
-        </Text>
-      ))}
-    </group>
-  );
-}
-
-function Images() {
-  const group = useRef<ZoomGroup>(null!);
-  const data = useScroll();
-  const { height } = useThree(s => s.viewport);
-
-  useFrame(() => {
-    group.current.children[0].material.zoom = 1 + data.range(0, 1 / 3) / 3;
-    group.current.children[1].material.zoom = 1 + data.range(0, 1 / 3) / 3;
-    group.current.children[2].material.zoom = 1 + data.range(1.15 / 3, 1 / 3) / 2;
-    group.current.children[3].material.zoom = 1 + data.range(1.15 / 3, 1 / 3) / 2;
-    group.current.children[4].material.zoom = 1 + data.range(1.15 / 3, 1 / 3) / 2;
-  });
-
-  return (
-    <group ref={group}>
-      <Image position={[-2, 0, 0]} scale={[3, height / 1.1]} url="/assets/demo/cs1.webp" />
-      <Image position={[2, 0, 3]} scale={3} url="/assets/demo/cs2.webp" />
-      <Image position={[-2.05, -height, 6]} scale={[1, 3]} url="/assets/demo/cs3.webp" />
-      <Image position={[-0.6, -height, 9]} scale={[1, 2]} url="/assets/demo/cs1.webp" />
-      <Image position={[0.75, -height, 10.5]} scale={1.5} url="/assets/demo/cs2.webp" />
-    </group>
-  );
-}
-
-function Typography() {
-  const DEVICE = {
-    mobile: { fontSize: 0.2 },
-    tablet: { fontSize: 0.4 },
-    desktop: { fontSize: 0.6 }
-  };
-  const getDevice = () => {
-    const w = window.innerWidth;
-    return w <= 639 ? 'mobile' : w <= 1023 ? 'tablet' : 'desktop';
-  };
-
-  const [device, setDevice] = useState<keyof typeof DEVICE>(getDevice());
-
-  useEffect(() => {
-    const onResize = () => setDevice(getDevice());
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
-  const { fontSize } = DEVICE[device];
-
-  return (
-    <Text
-      position={[0, 0, 12]}
-      fontSize={fontSize}
-      letterSpacing={-0.05}
-      outlineWidth={0}
-      outlineBlur="20%"
-      outlineColor="#000"
-      outlineOpacity={0.5}
-      color="white"
-      anchorX="center"
-      anchorY="middle"
-    >
-      React Bits
-    </Text>
-  );
-}
 
     function PromoBanner({ onNavigate }) {
       const slides = [
@@ -768,7 +453,7 @@ function Typography() {
               </div>
             </div>
             <div className='mt-4 flex items-center gap-3'>
-              <div className='flex items-center border rounded-xl shadow-sm border-white/10 bg.white/5'>
+              <div className='flex items-center border rounded-xl shadow-sm border-white/10 bg-white/5'>
                 <button className='px-3 py-2' onClick={()=>setQty(q=>Math.max(1,q-1))}>−</button>
                 <div className='px-4 py-2 min-w-10 text-center font-medium'>{qty}</div>
                 <button className='px-3 py-2' onClick={()=>setQty(q=>q+1)}>＋</button>
@@ -818,7 +503,7 @@ function Typography() {
       const [modal, setModal] = useState(null);
       return (
         <section className='py-6'>
-          <div className='flex items-end justify_between gap-4 mb-6'>
+          <div className='flex items-end justify-between gap-4 mb-6'>
             <div>
               <h2 className='text-2xl font-bold md:text-3xl'>Nuestros productos</h2>
               <p className='ink-2'>Descubre la botella Klyra, la <span className='font-medium text-emerald-300'>colección Kids</span> y los filtros en oferta.</p>
@@ -941,7 +626,7 @@ function Typography() {
                 <VariantCarousel color={color} setColor={setColor} />
               </div>
               <div className='p-6'>
-                <div className='flex items-center justify_between'>
+                <div className='flex items-center justify-between'>
                   <h3 className='text-xl font-semibold'>Klyra Bottle</h3>
                   <button onClick={onClose} className='text-slate-200/80 hover:text-white'>✕</button>
                 </div>
@@ -950,7 +635,7 @@ function Typography() {
                   <div className='text-sm font-medium'>🎨 Color</div>
                   <div className='mt-2 flex flex-wrap gap-2'>
                     {COLORS.map(c=> (
-                      <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items_center gap-2 shadow-sm',
+                      <button key={c.id} onClick={()=>setColor(c)} className={cls('px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm',
                         color.id===c.id? 'ring-2 ring-sky-500 border-sky-400/40 bg-white/5':'border-white/10 hover:bg-white/5')}>
                         <span className='w-4 h-4 rounded-full' style={{background:c.hex}}></span> {c.name}
                       </button>
@@ -986,7 +671,7 @@ function Typography() {
       );
     }
 
-    /* ===== Kids sin “Elige tu pack” y con ajustes móvil ===== */
+    /* ===== Kids ===== */
     function KidsPage({ onNavigate }){
       return (
         <section className='space-y-10'>
@@ -1041,122 +726,117 @@ function Typography() {
         </section>
       );
     }
-     /* ===== Carrusel del catálogo con autoplay y dots (HOME) ===== */
-function CatalogCarousel({ onNavigate }){
-  const scrollerRef = React.useRef(null);
-  const [index, setIndex] = React.useState(0);
-  const [paused, setPaused] = React.useState(false);
-  const items = CATALOG;       // usa tu array CATALOG existente
-  const INTERVAL = 4500;       // autoplay ms
 
-  const scrollToIndex = (i)=>{
-    const el = scrollerRef.current;
-    if(!el) return;
-    const child = el.children[i];
-    if(child) child.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-  };
+    /* ===== Carrusel HOME ===== */
+    function CatalogCarousel({ onNavigate }){
+      const scrollerRef = React.useRef(null);
+      const [index, setIndex] = React.useState(0);
+      const [paused, setPaused] = React.useState(false);
+      const items = CATALOG;
+      const INTERVAL = 4500;
 
-  // autoplay
-  React.useEffect(()=>{
-    if(paused || !items?.length) return;
-    const id = setInterval(()=>{
-      setIndex(prev => {
-        const next = (prev + 1) % items.length;
-        scrollToIndex(next);
-        return next;
-      });
-    }, INTERVAL);
-    return ()=> clearInterval(id);
-  }, [paused, items?.length]);
+      const scrollToIndex = (i)=>{
+        const el = scrollerRef.current;
+        if(!el) return;
+        const child = el.children[i];
+        if(child) child.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+      };
 
-  // sincroniza el índice al hacer scroll manual
-  React.useEffect(()=>{
-    const el = scrollerRef.current;
-    if(!el) return;
-    const handler = ()=>{
-      const w = el.clientWidth;
-      const approx = w * 0.9; // ancho aprox de card visible
-      const i = Math.round(el.scrollLeft / approx);
-      setIndex(Math.max(0, Math.min((items?.length||1)-1, i)));
-    };
-    el.addEventListener('scroll', handler, { passive: true });
-    return ()=> el.removeEventListener('scroll', handler);
-  }, [items?.length]);
+      React.useEffect(()=>{
+        if(paused || !items?.length) return;
+        const id = setInterval(()=>{
+          setIndex(prev => {
+            const next = (prev + 1) % items.length;
+            scrollToIndex(next);
+            return next;
+          });
+        }, INTERVAL);
+        return ()=> clearInterval(id);
+      }, [paused, items?.length]);
 
-  const scrollBy = (dir)=>{
-    setPaused(true);
-    const el = scrollerRef.current;
-    if(!el) return;
-    const w = el.clientWidth;
-    el.scrollBy({left: dir*w*0.9, behavior: 'smooth'});
-    setTimeout(()=>setPaused(false), 2000);
-  };
+      React.useEffect(()=>{
+        const el = scrollerRef.current;
+        if(!el) return;
+        const handler = ()=>{
+          const w = el.clientWidth;
+          const approx = w * 0.9;
+          const i = Math.round(el.scrollLeft / approx);
+          setIndex(Math.max(0, Math.min((items?.length||1)-1, i)));
+        };
+        el.addEventListener('scroll', handler, { passive: true });
+        return ()=> el.removeEventListener('scroll', handler);
+      }, [items?.length]);
 
-  if(!items?.length) return null;
+      const scrollBy = (dir)=>{
+        setPaused(true);
+        const el = scrollerRef.current;
+        if(!el) return;
+        const w = el.clientWidth;
+        el.scrollBy({left: dir*w*0.9, behavior: 'smooth'});
+        setTimeout(()=>setPaused(false), 2000);
+      };
 
-  return (
-    <section className="py-10">
-      <div className="flex items-end justify-between gap-4 mb-4">
-        <div>
-          <h2 className="text-2xl font-bold md:text-3xl">Explora el catálogo</h2>
-          <p className="ink-2 text-sm">Desliza o espera: pasa solo. Toca los puntos para saltar.</p>
-        </div>
-        <div className="hidden sm:flex gap-2">
-          <button aria-label="Anterior" onClick={()=>scrollBy(-1)} className="rounded-xl px-3 py-2 bg-white/10 border border-white/15">◀</button>
-          <button aria-label="Siguiente" onClick={()=>scrollBy(1)} className="rounded-xl px-3 py-2 bg-white/10 border border-white/15">▶</button>
-        </div>
-      </div>
+      if(!items?.length) return null;
 
-      <div
-        ref={scrollerRef}
-        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
-        onMouseEnter={()=>setPaused(true)}
-        onMouseLeave={()=>setPaused(false)}
-        onTouchStart={()=>setPaused(true)}
-        onTouchEnd={()=>setTimeout(()=>setPaused(false), 1500)}
-      >
-        {items.map((p)=> (
-          <article key={p.id} className="shrink-0 w-[88%] sm:w-[46%] lg:w-[32%] snap-center rounded-2xl overflow-hidden glass shadow-md">
-            <div className="relative">
-              {/* Navega: si es kids ve a 'kids', si no a 'products' */}
-              <button className="absolute inset-0 z-10"
-                onClick={()=> onNavigate?.(p.kind==='kids' ? 'kids' : 'products')}
-                aria-label={`Abrir ${p.title}`} />
-              {/* Usa tu SmartImg existente; si no, reemplaza por <img src={p.imageList?.[0]} .../> */}
-              <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-48 md:h-56 object-cover" />
-              {p.badge && (
-                <span className={`absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full border ${p.badge==='Oferta' ? 'bg-rose-400/20 text-rose-100 border-rose-300/25' : 'bg-sky-400/20 text-sky-100 border-sky-300/25'}`}>
-                  {p.badge}
-                </span>
-              )}
+      return (
+        <section className="py-10">
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-2xl font-bold md:text-3xl">Explora el catálogo</h2>
+              <p className="ink-2 text-sm">Desliza o espera: pasa solo. Toca los puntos para saltar.</p>
             </div>
-            <div className="p-4">
-              <h3 className="font-semibold leading-tight">{p.title}</h3>
-              <p className="text-sm ink-2 mt-1">{p.subtitle}</p>
-              <div className="mt-4 flex gap-2">
-                <button onClick={()=> onNavigate?.(p.kind==='kids' ? 'kids' : 'products')} className="flex-1 px-4 py-2 rounded-xl btn-primary">Ver</button>
-                <button onClick={()=> onNavigate?.('products')} className="px-4 py-2 rounded-xl btn-ghost hover:bg-white/10">Más</button>
-              </div>
+            <div className="hidden sm:flex gap-2">
+              <button aria-label="Anterior" onClick={()=>scrollBy(-1)} className="rounded-xl px-3 py-2 bg-white/10 border border-white/15">◀</button>
+              <button aria-label="Siguiente" onClick={()=>scrollBy(1)} className="rounded-xl px-3 py-2 bg-white/10 border border-white/15">▶</button>
             </div>
-          </article>
-        ))}
-      </div>
+          </div>
 
-      {/* Dots */}
-      <div className="mt-4 flex items-center justify-center gap-2">
-        {items.map((_, i)=>(
-          <button
-            key={i}
-            aria-label={`Ir al slide ${i+1}`}
-            onClick={()=>{ setPaused(true); setIndex(i); scrollToIndex(i); setTimeout(()=>setPaused(false), 2000); }}
-            className={`h-2.5 rounded-full transition-all ${i===index? 'w-6 bg-sky-400' : 'w-2.5 bg-white/35 hover:bg-white/60'}`}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
+          <div
+            ref={scrollerRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
+            onMouseEnter={()=>setPaused(true)}
+            onMouseLeave={()=>setPaused(false)}
+            onTouchStart={()=>setPaused(true)}
+            onTouchEnd={()=>setTimeout(()=>setPaused(false), 1500)}
+          >
+            {items.map((p)=> (
+              <article key={p.id} className="shrink-0 w-[88%] sm:w-[46%] lg:w-[32%] snap-center rounded-2xl overflow-hidden glass shadow-md">
+                <div className="relative">
+                  <button className="absolute inset-0 z-10"
+                    onClick={()=> onNavigate?.(p.kind==='kids' ? 'kids' : 'products')}
+                    aria-label={`Abrir ${p.title}`} />
+                  <SmartImg srcList={p.imageList} alt={p.title} className="w-full h-48 md:h-56 object-cover" />
+                  {p.badge && (
+                    <span className={`absolute left-3 top-3 text-xs font-medium px-2 py-1 rounded-full border ${p.badge==='Oferta' ? 'bg-rose-400/20 text-rose-100 border-rose-300/25' : 'bg-sky-400/20 text-sky-100 border-sky-300/25'}`}>
+                      {p.badge}
+                    </span>
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold leading-tight">{p.title}</h3>
+                  <p className="text-sm ink-2 mt-1">{p.subtitle}</p>
+                  <div className="mt-4 flex gap-2">
+                    <button onClick={()=> onNavigate?.(p.kind==='kids' ? 'kids' : 'products')} className="flex-1 px-4 py-2 rounded-xl btn-primary">Ver</button>
+                    <button onClick={()=> onNavigate?.('products')} className="px-4 py-2 rounded-xl btn-ghost hover:bg-white/10">Más</button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
 
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {items.map((_, i)=>(
+              <button
+                key={i}
+                aria-label={`Ir al slide ${i+1}`}
+                onClick={()=>{ setPaused(true); setIndex(i); scrollToIndex(i); setTimeout(()=>setPaused(false), 2000); }}
+                className={`h-2.5 rounded-full transition-all ${i===index? 'w-6 bg-sky-400' : 'w-2.5 bg-white/35 hover:bg-white/60'}`}
+              />
+            ))}
+          </div>
+        </section>
+      );
+    }
 
     function Features(){
       const items = [
@@ -1337,7 +1017,7 @@ function CatalogCarousel({ onNavigate }){
             <div className='mt-4 border-t border-white/10 pt-4 space-y-1 text-sm'>
               <div className='flex justify-between'><span className='ink-2'>Subtotal</span><span>{money(total || 0)}</span></div>
               <div className='flex justify-between'><span className='ink-2'>Envío</span><span>{shippingCost === 0 ? 'Gratis' : money(shippingCost)}</span></div>
-              <div className='flex justify_between font-semibold text-base mt-1'><span>Total</span><span>{money((total || 0) + shippingCost)}</span></div>
+              <div className='flex justify-between font-semibold text-base mt-1'><span>Total</span><span>{money((total || 0) + shippingCost)}</span></div>
             </div>
           </aside>
         </section>
@@ -1443,7 +1123,7 @@ function CatalogCarousel({ onNavigate }){
             <div className='space-y-2'>
               <button onClick={()=>onNavigate('home')} className='block text-left text-slate-300/90 hover:text-white'>Inicio</button>
               <button onClick={()=>onNavigate('products')} className='block text-left text-slate-300/90 hover:text-white'>Productos</button>
-              <button onClick={()=>onNavigate('kids')} className='block text_left text-slate-300/90 hover:text-white'>Kids</button>
+              <button onClick={()=>onNavigate('kids')} className='block text-left text-slate-300/90 hover:text-white'>Kids</button>
               <button onClick={()=>onNavigate('about')} className='block text-left text-slate-300/90 hover:text-white'>Nosotros</button>
               <button onClick={()=>onNavigate('suppliers')} className='block text-left text-slate-300/90 hover:text-white'>Proveedores</button>
               <button onClick={()=>onNavigate('chatbot')} className='block text-left text-slate-300/90 hover:text-white'>Chatbot</button>
@@ -1466,8 +1146,75 @@ function CatalogCarousel({ onNavigate }){
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
   </script>
+
+  <!-- ======= 3D con R3F + drei (ESM separado) ======= -->
+  <script type="module">
+    import React, { useRef } from 'https://esm.sh/react@18.3.1';
+    import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+    import * as THREE from 'https://esm.sh/three@0.160.0';
+    import { Canvas, useFrame, useThree } from 'https://esm.sh/@react-three/fiber@8.15.15';
+    import { MeshTransmissionMaterial, Environment, OrbitControls } from 'https://esm.sh/@react-three/drei@9.97.3';
+
+    function damp(current, target, lambda, dt) {
+      return THREE.MathUtils.damp(current, target, lambda, dt);
+    }
+
+    function GlassShape() {
+      const ref = useRef();
+      const { viewport } = useThree();
+      const geo = new THREE.TorusKnotGeometry(1, 0.3, 220, 30);
+
+      useFrame((state, dt) => {
+        const { pointer } = state;
+        ref.current.rotation.x = damp(ref.current.rotation.x, pointer.y * 0.6, 4, dt);
+        ref.current.rotation.y = damp(ref.current.rotation.y, pointer.x * 1.0, 4, dt);
+        ref.current.position.y = Math.sin(state.clock.elapsedTime * 0.7) * 0.1;
+        const s = Math.min(viewport.width, viewport.height) * 0.22;
+        ref.current.scale.setScalar(THREE.MathUtils.clamp(s, 0.8, 1.35));
+      });
+
+      return (
+        <mesh ref={ref} geometry={geo}>
+          <MeshTransmissionMaterial
+            transmission={1}
+            thickness={1.5}
+            roughness={0.05}
+            ior={1.2}
+            chromaticAberration={0.12}
+            anisotropy={0.08}
+            distortion={0.15}
+            distortionScale={0.25}
+            temporalDistortion={0.15}
+            attenuationColor={'#a7e8ff'}
+            attenuationDistance={0.6}
+            background={new THREE.Color(0x0b1424)}
+          />
+        </mesh>
+      );
+    }
+
+    function Scene() {
+      return (
+        <Canvas gl={{ antialias: true }} camera={{ position: [0, 0, 5.5], fov: 40 }}>
+          <ambientLight intensity={0.4} />
+          <directionalLight position={[5, 5, 5]} intensity={0.8} />
+          <Environment preset="city" />
+          <GlassShape />
+          <OrbitControls enableZoom={false} enablePan={false} />
+        </Canvas>
+      );
+    }
+
+    const container = document.getElementById('klyra-3d');
+    if (container) {
+      createRoot(container).render(<Scene />);
+    } else {
+      console.warn('Contenedor #klyra-3d no encontrado.');
+    }
+  </script>
 </body>
 </html>
+
 
 
 
