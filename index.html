@@ -217,6 +217,62 @@
         </div>
       );
     }
+    /* ===== TopBar con menú móvil ===== */
+    function TopBar({ onNavigate, cartCount, current }){
+      const [open, setOpen] = useState(false);
+      return (
+        <header className='fixed top-0 left-0 right-0 z-40 glass border-b border-white/10'>
+          <div className='max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16'>
+            <div className='flex items-center gap-2 cursor-pointer' onClick={()=>{ onNavigate('home'); setOpen(false); }}>
+              <img src='logo.svg' alt='Klyra' className='w-9 h-9 rounded-xl object-contain' onError={(e)=>{e.currentTarget.style.display='none';}}/>
+              <div className='leading-tight'>
+                <div className='text-[12px] tracking-wide text-slate-300/90'>Klyra</div>
+                <div className='text-lg font-semibold -mt-0.5'>Bottle</div>
+              </div>
+            </div>
+
+            {/* Desktop nav */}
+            <nav className='hidden sm:flex items-center gap-5'>
+              <NavLink active={current==='home'} onClick={()=>onNavigate('home')}>Inicio</NavLink>
+              <NavLink active={current==='products'} onClick={()=>onNavigate('products')}>Productos</NavLink>
+              <NavLink active={current==='kids'} onClick={()=>onNavigate('kids')}>Kids</NavLink>
+              <NavLink active={current==='about'} onClick={()=>onNavigate('about')}>Nosotros</NavLink>
+              <NavLink active={current==='suppliers'} onClick={()=>onNavigate('suppliers')}>Proveedores</NavLink>
+              <NavLink active={current==='chatbot'} onClick={()=>onNavigate('chatbot')}>Chatbot</NavLink>
+            </nav>
+
+            {/* Botones derecha */}
+            <div className='flex items-center gap-2'>
+              <button onClick={()=>onNavigate('cart')} className='relative hidden sm:flex rounded-2xl btn-primary px-4 py-2 items-center gap-2 active:scale-[.99]'>
+                <span className='text-lg'>🛒</span>Carrito
+                {cartCount>0 && <span className='absolute -top-2 -right-2 bg-sky-500 text-white text-xs rounded-full px-2 py-0.5 border border-white/30'>{cartCount}</span>}
+              </button>
+              {/* Burger móvil */}
+              <button
+                className='sm:hidden rounded-xl bg-white/10 border border-white/15 px-3 py-2'
+                aria-label='Abrir menú'
+                onClick={()=>setOpen(v=>!v)}
+              >{open? '✕' : '☰'}</button>
+            </div>
+          </div>
+
+          {/* Drawer móvil */}
+          {open && (
+            <div className='sm:hidden border-t border-white/10 glass px-4 py-3'>
+              <div className='flex flex-col gap-2 text-sm'>
+                <button onClick={()=>{onNavigate('home');setOpen(false);}} className='text-left py-2'>Inicio</button>
+                <button onClick={()=>{onNavigate('products');setOpen(false);}} className='text-left py-2'>Productos</button>
+                <button onClick={()=>{onNavigate('kids');setOpen(false);}} className='text-left py-2'>Kids</button>
+                <button onClick={()=>{onNavigate('about');setOpen(false);}} className='text-left py-2'>Nosotros</button>
+                <button onClick={()=>{onNavigate('suppliers');setOpen(false);}} className='text-left py-2'>Proveedores</button>
+                <button onClick={()=>{onNavigate('chatbot');setOpen(false);}} className='text-left py-2'>Chatbot</button>
+                <button onClick={()=>{onNavigate('cart');setOpen(false);}} className='mt-2 rounded-xl btn-primary py-2'>🛒 Ver carrito {cartCount>0?`(${cartCount})`:''}</button>
+              </div>
+            </div>
+          )}
+        </header>
+      );
+    }
     /* eslint-disable react/no-unknown-property */
 import * as THREE from 'three';
 import { useRef, useState, useEffect, memo, ReactNode } from 'react';
@@ -537,64 +593,6 @@ function Typography() {
     </Text>
   );
 }
-
-
-    /* ===== TopBar con menú móvil ===== */
-    function TopBar({ onNavigate, cartCount, current }){
-      const [open, setOpen] = useState(false);
-      return (
-        <header className='fixed top-0 left-0 right-0 z-40 glass border-b border-white/10'>
-          <div className='max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16'>
-            <div className='flex items-center gap-2 cursor-pointer' onClick={()=>{ onNavigate('home'); setOpen(false); }}>
-              <img src='logo.svg' alt='Klyra' className='w-9 h-9 rounded-xl object-contain' onError={(e)=>{e.currentTarget.style.display='none';}}/>
-              <div className='leading-tight'>
-                <div className='text-[12px] tracking-wide text-slate-300/90'>Klyra</div>
-                <div className='text-lg font-semibold -mt-0.5'>Bottle</div>
-              </div>
-            </div>
-
-            {/* Desktop nav */}
-            <nav className='hidden sm:flex items-center gap-5'>
-              <NavLink active={current==='home'} onClick={()=>onNavigate('home')}>Inicio</NavLink>
-              <NavLink active={current==='products'} onClick={()=>onNavigate('products')}>Productos</NavLink>
-              <NavLink active={current==='kids'} onClick={()=>onNavigate('kids')}>Kids</NavLink>
-              <NavLink active={current==='about'} onClick={()=>onNavigate('about')}>Nosotros</NavLink>
-              <NavLink active={current==='suppliers'} onClick={()=>onNavigate('suppliers')}>Proveedores</NavLink>
-              <NavLink active={current==='chatbot'} onClick={()=>onNavigate('chatbot')}>Chatbot</NavLink>
-            </nav>
-
-            {/* Botones derecha */}
-            <div className='flex items-center gap-2'>
-              <button onClick={()=>onNavigate('cart')} className='relative hidden sm:flex rounded-2xl btn-primary px-4 py-2 items-center gap-2 active:scale-[.99]'>
-                <span className='text-lg'>🛒</span>Carrito
-                {cartCount>0 && <span className='absolute -top-2 -right-2 bg-sky-500 text-white text-xs rounded-full px-2 py-0.5 border border-white/30'>{cartCount}</span>}
-              </button>
-              {/* Burger móvil */}
-              <button
-                className='sm:hidden rounded-xl bg-white/10 border border-white/15 px-3 py-2'
-                aria-label='Abrir menú'
-                onClick={()=>setOpen(v=>!v)}
-              >{open? '✕' : '☰'}</button>
-            </div>
-          </div>
-
-          {/* Drawer móvil */}
-          {open && (
-            <div className='sm:hidden border-t border-white/10 glass px-4 py-3'>
-              <div className='flex flex-col gap-2 text-sm'>
-                <button onClick={()=>{onNavigate('home');setOpen(false);}} className='text-left py-2'>Inicio</button>
-                <button onClick={()=>{onNavigate('products');setOpen(false);}} className='text-left py-2'>Productos</button>
-                <button onClick={()=>{onNavigate('kids');setOpen(false);}} className='text-left py-2'>Kids</button>
-                <button onClick={()=>{onNavigate('about');setOpen(false);}} className='text-left py-2'>Nosotros</button>
-                <button onClick={()=>{onNavigate('suppliers');setOpen(false);}} className='text-left py-2'>Proveedores</button>
-                <button onClick={()=>{onNavigate('chatbot');setOpen(false);}} className='text-left py-2'>Chatbot</button>
-                <button onClick={()=>{onNavigate('cart');setOpen(false);}} className='mt-2 rounded-xl btn-primary py-2'>🛒 Ver carrito {cartCount>0?`(${cartCount})`:''}</button>
-              </div>
-            </div>
-          )}
-        </header>
-      );
-    }
 
     function PromoBanner({ onNavigate }) {
       const slides = [
@@ -1470,6 +1468,7 @@ function CatalogCarousel({ onNavigate }){
   </script>
 </body>
 </html>
+
 
 
 
